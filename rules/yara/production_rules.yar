@@ -63,12 +63,13 @@ rule SC_Infostealer_Generic_Capabilities
         $wal1 = "wallet.dat" nocase ascii wide
         $wal2 = "Atomic\\Local Storage" nocase ascii wide
         $wal3 = "Metamask" nocase ascii wide
-        $scr1 = "screenshot" nocase ascii wide
-        $scr2 = "Grabber" nocase ascii wide
+        $steal1 = "stealer" nocase ascii wide
+        $steal2 = "password_grabber" nocase ascii wide
+        $steal3 = "exfiltrat" nocase ascii wide
     condition:
         filesize < 10MB and (
-            $sql or
-            (2 of ($c1, $c2, $c3) and 1 of ($wal1, $wal2, $wal3, $scr1, $scr2))
+            ($sql and 1 of ($wal1, $wal2, $wal3, $steal1, $steal2, $steal3)) or
+            (2 of ($c1, $c2, $c3) and 1 of ($wal1, $wal2, $wal3) and 1 of ($steal1, $steal2, $steal3))
         )
 }
 
@@ -87,10 +88,13 @@ rule SC_Generic_Webshell_Backdoor
         $aspx1 = "ProcessStartInfo" nocase ascii
         $aspx2 = "cmd.exe" nocase ascii
         $aspx3 = "RedirectStandardOutput" nocase ascii
+        $tag1 = "<%" ascii
+        $tag2 = "<?php" nocase ascii
+        $tag3 = "<script runat" nocase ascii
     condition:
         filesize < 2MB and (
-            ($php1 and $php2 and ($php3 or $php4 or $php5)) or
-            ($aspx1 and $aspx2 and $aspx3)
+            ($tag2 and $php1 and $php2 and ($php3 or $php4 or $php5)) or
+            (($tag1 or $tag3) and $aspx1 and $aspx2 and $aspx3)
         )
 }
 
@@ -179,10 +183,13 @@ rule SC_Infostealer_LummaC2_Patterns
         $s2 = "lumma" nocase ascii
         $s3 = "Content-Type: multipart/form-data; boundary=" ascii
         $s4 = "attachment; filename=\"file.zip\"" ascii
+        $c2_1 = "lummac2" nocase ascii
+        $c2_2 = "/api/report" ascii
     condition:
         filesize < 5MB and (
             ($s2 and $s1) or
-            ($s3 and $s4)
+            ($s2 and $s3 and $s4) or
+            (1 of ($c2_1, $c2_2) and $s3)
         )
 }
 

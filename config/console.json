@@ -17,5 +17,6 @@
     "osquery": "osqueryd",
     "sysmon": "Sysmon64"
   },
+  "sigma_min_level": "high",
   "_note": "Most options are now changed from the Settings page in Security Console, not here."
 }

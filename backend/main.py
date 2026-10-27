@@ -72,7 +72,7 @@ DEFAULT_CFG = {
     "quarantine": str(BASE / "quarantine"),
     "services": {"clamav": "ClamD", "freshclam": "FreshClam", "osquery": "osqueryd", "sysmon": "Sysmon64"},
     # ---- everything below can be changed from the Settings page ----
-    "sigma_min_level": "medium",
+    "sigma_min_level": "high",
     "sigma_include_experimental": False,
     "sigma_every": 15,                # minutes, 0 = off
     "hunts_every": 60,                # minutes, 0 = off
@@ -322,6 +322,24 @@ def emit(engine, severity, rule, target, details="", uniq=None, origin="", mitre
 PID_RE = re.compile(r"\b(?:PID|ParentPID|ProcessId|ParentProcessId|SrcPID|SourceProcessId)\s*[:=]\s*(\d+)", re.I)
 OWN_NAMES = ("sysmon64", "sysmondrv", "clamd", "freshclam", "osqueryd", "nssm.exe")
 
+BENIGN_SIGMA_PATTERNS = (
+    "powershell script execution",
+    "non-interactive powershell",
+    "windows command shell started from",
+    "standard command-line process",
+    "system network discovery",
+    "local accounts discovery",
+    "task scheduler task started",
+    "bits transfer activity",
+    "cryptographic key operation",
+    "generic network connection",
+    "user account enumeration",
+    "windows defender telemetry",
+    "whoami execution",
+    "net.exe execution",
+    "tasklist execution",
+)
+
 
 def self_markers() -> set[str]:
     port = str(CFG.get("port", 8080))
@@ -340,6 +358,20 @@ def is_self_noise(text: str) -> bool:
     return any(OWN_PIDS.get(int(p), 0) > cutoff for p in PID_RE.findall(text))
 
 
+def is_benign_sysmon_noise(rule: str, details: str, sev: str) -> bool:
+    """Filter out routine, noisy low/medium telemetry rules triggered by legitimate Windows processes."""
+    r = (rule or "").lower()
+    d = (details or "").lower()
+    if sev in ("low", "medium"):
+        if any(p in r for p in BENIGN_SIGMA_PATTERNS):
+            return True
+        if any(proc in d for proc in ("searchindexer.exe", "msmpeng.exe", "tiworker.exe", "trustedinstaller.exe",
+                                      "mousocoreworker.exe", "chrome.exe", "msedge.exe", "svchost.exe",
+                                      "runtimebroker.exe", "taskhostw.exe", "conhost.exe", "explorer.exe")):
+            return True
+    return False
+
+
 def is_self_row(row: dict) -> bool:
     if not CFG.get("hide_self", True):
         return False
@@ -348,15 +380,17 @@ def is_self_row(row: dict) -> bool:
 
 
 def hide_self_alerts() -> int:
-    """Hide alerts that OmniShield's own activity caused (also tidies up older versions' alerts)."""
+    """Hide alerts that OmniShield's own activity caused, and tidy up routine telemetry noise."""
     if not CFG.get("hide_self", True):
         return 0
     with db() as con:
-        rows = con.execute("SELECT id,engine,target,details FROM events WHERE status='new' "
+        rows = con.execute("SELECT id,engine,rule,severity,target,details FROM events WHERE status='new' "
                            "AND engine IN ('sigma','osquery')").fetchall()
     ids = []
     for r in rows:
         hit = is_self_noise(f'{r["target"]} {r["details"]}')
+        if not hit and r["engine"] == "sigma":
+            hit = is_benign_sysmon_noise(r["rule"], r["details"] or "", r["severity"])
         if not hit and r["engine"] == "osquery":
             try:
                 hit = is_self_row(json.loads(r["details"] or "{}"))
@@ -367,7 +401,7 @@ def hide_self_alerts() -> int:
     if ids:
         with _db_lock, db() as con:
             con.executemany("UPDATE events SET status='ack' WHERE id=?", [(i,) for i in ids])
-        log.info("hid %d alerts caused by OmniShield itself", len(ids))
+        log.info("hid %d alerts caused by OmniShield itself or routine telemetry noise", len(ids))
     return len(ids)
 
 
@@ -461,6 +495,8 @@ def ingest_hayabusa(out: pathlib.Path, origin: str = "") -> int:
             ts = row.get("Timestamp", "")
             target = f'{row.get("Computer", "")} / {row.get("Channel", "")} / EID {row.get("EventID", "")}'
             sev = SIGMA_LEVEL.get(str(row.get("Level", "")).lower(), "medium")
+            if is_benign_sysmon_noise(rule, details, sev):
+                continue
             key = f'{ts}|{rule}|{row.get("Computer", "")}|{row.get("Channel", "")}|{row.get("EventID", "")}|{row.get("RecordID", "")}'
             mitre = ""
             ma = row.get("MitreAttack")
@@ -2332,8 +2368,15 @@ class RealTime:
             self.comp["sysmon"]["events"] = self.comp["sysmon"].get("events", 0) + 1
             self.comp["sysmon"]["last"] = now()
         if ev["EventID"] == 11:
-            if not self.own(ev.get("Image", "")):
-                self.enqueue(ev.get("TargetFilename", ""), "file", "New file (Sysmon)", {"writer": ev.get("Image", "")})
+            target = ev.get("TargetFilename", "")
+            writer = ev.get("Image", "")
+            if not self.own(writer) and not self.own(target):
+                # Filter out transient temp cache files created by trusted system services
+                if is_system_file(writer) and any(x in target.lower() for x in ("\\appdata\\local\\temp\\", "\\windows\\temp\\", "\\service-worker\\", "\\cache\\")):
+                    sig = verify_authenticode(writer)
+                    if sig.get("valid") and sig.get("is_ms"):
+                        return
+                self.enqueue(target, "file", "New file (Sysmon)", {"writer": writer})
         elif ev["EventID"] == 1:
             image, parent = ev.get("Image", ""), ev.get("ParentImage", "")
             pid = ev.get("ProcessId", "")
@@ -2344,6 +2387,11 @@ class RealTime:
                 return
             if self.own(image) or self.own(parent):
                 return
+            # If the process is a verified trusted Microsoft system component, skip scanning it as an unknown process
+            if is_system_file(image):
+                sig = verify_authenticode(image)
+                if sig.get("valid") and sig.get("is_ms"):
+                    return
             h = re.search(r"SHA256=([0-9A-Fa-f]{64})", ev.get("Hashes", ""))
             self.enqueue(image, "process", "New program (Sysmon)",
                          {"pid": pid, "parent": parent, "cmd": ev.get("CommandLine", ""),

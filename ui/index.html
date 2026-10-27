@@ -4,7 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>OmniShield — Unified Windows Endpoint Defense</title>
-<link rel="icon" href="/static/logo.png">
+<link rel="icon" type="image/svg+xml" href="/static/logo.svg">
+<link rel="alternate icon" href="/static/logo.png">
 <style>
 @font-face{font-family:"InterSC";src:url("/static/fonts/InterVariable.woff2") format("woff2");font-weight:100 900;font-display:swap}
 :root{
@@ -60,11 +61,13 @@ kbd{font-family:inherit;font-size:11px;padding:2px 6px;border-radius:6px;border:
 
 /* sidebar */
 aside{width:244px;padding:18px 14px;display:flex;flex-direction:column;position:fixed;left:0;top:0;bottom:0;height:100vh;overflow-y:auto;overflow-x:hidden;border-right:1px solid var(--line);background:var(--surface);backdrop-filter:blur(20px);z-index:5}
-.logo{display:flex;align-items:center;gap:12px;padding:4px 8px 24px}
-.logo i{width:38px;height:38px;border-radius:11px;background:conic-gradient(from 210deg,#6366f1,#8b5cf6,#06b6d4,#6366f1);display:grid;place-items:center;color:#fff;box-shadow:0 8px 20px -8px var(--glow);position:relative}
-.logo i svg{width:20px;height:20px}
-.logo i::after{content:"";position:absolute;inset:-4px;border-radius:14px;border:1px solid var(--brand);opacity:0;animation:ping 3s infinite}
-.logo b{font-size:15px;font-weight:650;display:block;letter-spacing:-.02em}.logo small{display:block;font-size:11px;color:var(--mute);font-weight:500}
+.logo{display:flex;align-items:center;gap:12px;padding:6px 8px 22px;user-select:none}
+.logo-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 0 14px rgba(6,182,212,0.4);border:1px solid rgba(56,189,248,0.22);background:#0b1120;overflow:hidden;transition:transform .2s var(--ease),box-shadow .2s var(--ease)}
+.logo:hover .logo-icon{transform:scale(1.05);box-shadow:0 0 18px rgba(6,182,212,0.6)}
+.logo-icon img{width:100%;height:100%;object-fit:contain;display:block}
+.logo-text{display:flex;flex-direction:column;justify-content:center;line-height:1}
+.logo-text b{font-size:15px;font-weight:700;line-height:1.2;letter-spacing:-.015em;display:block;color:var(--text)}
+.logo-text small{display:block;font-size:11px;color:var(--mute);font-weight:500;line-height:1.2;margin-top:2px;letter-spacing:.01em}
 @keyframes ping{0%{opacity:.6;transform:scale(.9)}100%{opacity:0;transform:scale(1.35)}}
 .nav{position:relative}
 .nav .sec{font-size:11px;font-weight:600;color:var(--mute);text-transform:uppercase;letter-spacing:.07em;padding:14px 12px 6px}
@@ -596,7 +599,15 @@ html[data-motion=off] *,html[data-motion=off] *::before,html[data-motion=off] *:
 </defs></svg>
 
 <aside>
-  <div class="logo"><img src="/static/logo.png" alt="OmniShield Logo" style="width:34px;height:34px;border-radius:8px;object-fit:cover;box-shadow:0 0 12px rgba(6,182,212,0.45);flex-shrink:0"><span><b>OmniShield</b><small>Endpoint Defense</small></span></div>
+  <div class="logo">
+    <div class="logo-icon">
+      <img src="/static/logo.svg" onerror="this.onerror=null;this.src='/static/logo.png'" alt="OmniShield" width="36" height="36">
+    </div>
+    <div class="logo-text">
+      <b>OmniShield</b>
+      <small>Endpoint Defense</small>
+    </div>
+  </div>
   <nav class="nav">
     <div class="ind" id="navInd"></div>
     <a data-p="home" class="on"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg><span class="lbl">Dashboard</span></a>

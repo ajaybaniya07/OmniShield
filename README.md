@@ -63,7 +63,7 @@ It empowers system administrators, security analysts, and enthusiasts to detect 
 ┌─────────────────────────────────────────────────────────────────────────────────┐
 │                           WINDOWS HOST TELEMETRY                                │
 │                                                                                 │
-│  [Windows Defender / ASR]  [Microsoft Sysmon]  [ClamAV Engine]  [YARA Scanner]   │
+│  [Windows Defender / ASR]  [Microsoft Sysmon]  [ClamAV Engine]  [YARA Scanner]  │
 │       EventIDs 1116-1122       Process / Net     On-Demand / RT   Stealer Rules │
 └───────────────────────┬─────────────────┬──────────────┬───────────────┬────────┘
                         │                 │              │               │
@@ -75,8 +75,8 @@ It empowers system administrators, security analysts, and enthusiasts to detect 
 │   • osquery Periodic Baseline Difference Engine (Startup, Services, Tasks)      │
 │   • WinVerifyTrust Authenticode & Catalog Signature Verifier                    │
 │   • Shannon Entropy Analyzer & Unicode Right-to-Left Override (RLO) Detector    │
-│   • Decoy Canary Tripwire Engine (with benign indexer allow-listing)             │
-│   • Redaction Filter (Scrubs tokens from Zone.Identifier HostUrl/ReferrerUrl)  │
+│   • Decoy Canary Tripwire Engine (with benign indexer allow-listing)            │
+│   • Redaction Filter (Scrubs tokens from Zone.Identifier HostUrl/ReferrerUrl)   │
 └────────────────────────────────────────┬────────────────────────────────────────┘
                                          │
                                          ▼

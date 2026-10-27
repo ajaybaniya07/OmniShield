@@ -1,12 +1,6 @@
 <div align="center">
-  <a href="https://github.com/ajaybaniya07/OmniShield">
-    <img src="ui/logo.png" width="180" height="180" alt="OmniShield Logo" style="border-radius: 24px; box-shadow: 0 8px 24px rgba(0,0,0,0.35);" />
-  </a>
-  <br/><br/>
   <h1>🛡️ OmniShield 2.0</h1>
   <p><b>Unified Multi-Engine Windows Endpoint Defense & Threat Hunting Platform</b></p>
-  <br/>
-  <img src="ui/banner.png" width="850" alt="OmniShield EDR Cybersecurity Banner" style="border-radius: 12px; max-width: 100%;" />
 </div>
 
 [![Platform: Windows 11 / 10 (x64)](https://img.shields.io/badge/Platform-Windows%2011%20%7C%2010%20(x64)-blue.svg?logo=windows)](https://microsoft.com/windows)

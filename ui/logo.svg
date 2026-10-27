@@ -1,133 +1,60 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" width="100%" height="100%">
   <defs>
-    <style>
-      @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@800;900&amp;display=swap');
-      .brand-title {
-        font-family: 'Montserrat', system-ui, -apple-system, sans-serif;
-        font-weight: 900;
-        letter-spacing: 14px;
-        fill: #ffffff;
-      }
-      .brand-sub {
-        font-family: 'Montserrat', system-ui, -apple-system, sans-serif;
-        font-weight: 800;
-        letter-spacing: 8px;
-        fill: #38bdf8;
-      }
-    </style>
-
-    <!-- Dark Slate Cyber Background -->
-    <radialGradient id="bgGrad" cx="50%" cy="40%" r="65%">
-      <stop offset="0%" stop-color="#141c2b"/>
-      <stop offset="60%" stop-color="#0a0e17"/>
-      <stop offset="100%" stop-color="#05070c"/>
-    </radialGradient>
-
-    <!-- Deep Navy Shield Fill -->
-    <linearGradient id="shieldNavy" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#1a3f6d"/>
-      <stop offset="50%" stop-color="#112f53"/>
-      <stop offset="100%" stop-color="#0b203a"/>
+    <linearGradient id="shieldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1E3A6E"/>
+      <stop offset="50%" stop-color="#1E56A0"/>
+      <stop offset="100%" stop-color="#06B6D4"/>
     </linearGradient>
-
-    <!-- Bright Cyan / Turquoise Orbital Ribbon Gradient -->
-    <linearGradient id="cyanRibbon" x1="0%" y1="100%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#06b6d4"/>
-      <stop offset="35%" stop-color="#22d3ee"/>
-      <stop offset="70%" stop-color="#38bdf8"/>
-      <stop offset="100%" stop-color="#7dd3fc"/>
+    <linearGradient id="innerGrad" x1="100%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#06B6D4"/>
+      <stop offset="50%" stop-color="#0EA5E9"/>
+      <stop offset="100%" stop-color="#1E3A6E"/>
     </linearGradient>
-
-    <linearGradient id="backRibbon" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#0284c7"/>
-      <stop offset="100%" stop-color="#0369a1"/>
-    </linearGradient>
-
-    <!-- Neon Glow Filter -->
-    <filter id="ribbonGlow" x="-20%" y="-20%" width="140%" height="140%">
-      <feGaussianBlur stdDeviation="6" result="blur"/>
-      <feMerge>
-        <feMergeNode in="blur"/>
-        <feMergeNode in="SourceGraphic"/>
-      </feMerge>
-    </filter>
-
-    <filter id="softGlow" x="-40%" y="-40%" width="180%" height="180%">
-      <feGaussianBlur stdDeviation="40"/>
-    </filter>
   </defs>
 
   <!-- Background -->
-  <rect width="1000" height="1000" rx="48" fill="url(#bgGrad)"/>
+  <rect width="1000" height="1000" rx="120" fill="#0e1423"/>
 
-  <!-- Cyan Ambient Lighting -->
-  <circle cx="500" cy="400" r="230" fill="#00d2ff" opacity="0.14" filter="url(#softGlow)"/>
+  <!-- Outer Shield -->
+  <path d="M 500,100 
+           L 760,220 
+           L 760,440 
+           C 760,610 640,710 500,750 
+           C 360,710 240,610 240,440 
+           L 240,220 Z" 
+        fill="none" stroke="url(#shieldGrad)" stroke-width="36" stroke-linejoin="round"/>
 
-  <g transform="translate(0, 0)">
-    <!-- 1. ORBITAL RIBBON: BACK SEGMENT (Behind top-right shoulder) -->
-    <path d="M 545,260 
-             C 610,250 655,275 665,315 
-             C 673,355 640,405 585,450 
-             L 560,425 
-             C 605,390 628,355 622,330 
-             C 615,302 575,285 528,290 Z" 
-          fill="url(#backRibbon)"/>
+  <!-- Inner Shield -->
+  <path d="M 500,210 
+           L 670,295 
+           L 670,430 
+           C 670,555 585,630 500,660 
+           C 415,630 330,555 330,430 
+           L 330,295 Z" 
+        fill="none" stroke="url(#innerGrad)" stroke-width="28" stroke-linejoin="round"/>
 
-    <!-- 2. OUTER SHIELD (NAVY BLUE) -->
-    <path d="M 500,240 
-             L 620,310 
-             L 620,530 
-             C 620,645 555,718 500,760 
-             C 445,718 380,645 380,530 
-             L 380,310 Z" 
-          fill="url(#shieldNavy)" 
-          stroke="#091a2f" 
-          stroke-width="3"/>
+  <!-- Letter O (Elegant Flowing) -->
+  <ellipse cx="500" cy="420" rx="95" ry="120" 
+           fill="none" stroke="url(#shieldGrad)" stroke-width="30"/>
 
-    <!-- 3. NEGATIVE SPACE CHANNEL (CREATES DOUBLE-SHIELD BORDER) -->
-    <path d="M 500,295 
-             L 582,345 
-             L 582,515 
-             C 582,605 538,662 500,698 
-             C 462,662 418,605 418,515 
-             L 418,345 Z" 
-          fill="#0a0e17"/>
+  <!-- Connecting Lines (Shield to O) -->
+  <line x1="500" y1="100" x2="500" y2="210" stroke="url(#shieldGrad)" stroke-width="18" stroke-linecap="round"/>
+  <line x1="500" y1="660" x2="500" y2="750" stroke="url(#innerGrad)" stroke-width="18" stroke-linecap="round"/>
 
-    <!-- 4. INNER SHIELD (NAVY BLUE) -->
-    <path d="M 500,330 
-             L 560,368 
-             L 560,498 
-             C 560,572 525,622 500,652 
-             C 475,622 440,572 440,498 
-             L 440,368 Z" 
-          fill="url(#shieldNavy)"/>
+  <!-- Typography -->
+  <text x="500" y="855"
+        text-anchor="middle"
+        font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif"
+        font-weight="800"
+        font-size="60"
+        letter-spacing="10"
+        fill="#ffffff">OMNISHIELD</text>
 
-    <!-- 5. ORBITAL RIBBON: FRONT SEGMENT (Sweeps in front from lower-left across the shield) -->
-    <path d="M 345,515 
-             C 335,585 348,642 400,672 
-             C 465,708 545,678 595,625 
-             C 635,578 662,508 668,432 
-             C 670,395 658,355 638,332 
-             L 608,355 
-             C 622,375 632,408 630,438 
-             C 625,495 602,555 565,595 
-             C 525,638 460,660 415,635 
-             C 378,612 368,572 378,525 Z" 
-          fill="url(#cyanRibbon)" 
-          filter="url(#ribbonGlow)"/>
-  </g>
-
-  <!-- 6. TYPOGRAPHY: OMNISHIELD -->
-  <text x="506" y="855" 
-        text-anchor="middle" 
-        class="brand-title" 
-        font-size="64">OMNISHIELD</text>
-
-  <!-- 7. SUBTITLE: • EDR CYBERSECURITY • -->
-  <text x="504" y="908" 
-        text-anchor="middle" 
-        class="brand-sub" 
-        font-size="23">
-    <tspan fill="#38bdf8">•</tspan> EDR CYBERSECURITY <tspan fill="#38bdf8">•</tspan>
-  </text>
+  <text x="500" y="910"
+        text-anchor="middle"
+        font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif"
+        font-weight="600"
+        font-size="20"
+        letter-spacing="8"
+        fill="#06B6D4">ENDPOINT DEFENSE</text>
 </svg>

@@ -1,0 +1,7 @@
+fastapi>=0.110
+uvicorn>=0.29
+pydantic>=2
+pyinstaller>=6
+watchdog>=4
+psutil>=5.9
+pywin32>=306; sys_platform == "win32"

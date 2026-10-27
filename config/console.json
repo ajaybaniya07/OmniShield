@@ -1,0 +1,21 @@
+{
+  "host": "127.0.0.1",
+  "port": 8080,
+  "clamdscan": "C:\\Program Files\\ClamAV\\clamdscan.exe",
+  "clamscan": "C:\\Program Files\\ClamAV\\clamscan.exe",
+  "clamd_host": "127.0.0.1",
+  "clamd_port": 3310,
+  "yara": "C:\\SecurityConsole\\tools\\yara\\yara64.exe",
+  "yarac": "C:\\SecurityConsole\\tools\\yara\\yarac64.exe",
+  "yara_rules": "C:\\SecurityConsole\\rules\\yara\\index.yar",
+  "osqueryi": "C:\\Program Files\\osquery\\osqueryi.exe",
+  "hayabusa": "C:\\SecurityConsole\\tools\\hayabusa\\hayabusa.exe",
+  "quarantine": "C:\\SecurityConsole\\quarantine",
+  "services": {
+    "clamav": "ClamD",
+    "freshclam": "FreshClam",
+    "osquery": "osqueryd",
+    "sysmon": "Sysmon64"
+  },
+  "_note": "Most options are now changed from the Settings page in Security Console, not here."
+}

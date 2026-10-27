@@ -1,4 +1,4 @@
-/* Security Console add-on 1.9 - VirusTotal page, settings, quota meter and "Is this safe?" integration */
+/* OmniShield add-on 1.9 - VirusTotal page, settings, quota meter and "Is this safe?" integration */
 (function () {
 "use strict";
 const Q = s => document.querySelector(s), QA = s => [...document.querySelectorAll(s)];
@@ -95,7 +95,7 @@ function meters(u, withSync = true) {
     <div class="row"><div class="lbl"><b>This minute</b><small>${u.wait > 0 ? `next in ${Math.ceil(u.wait)} s` : "ready"}</small></div><div>${dots}</div><div class="num"><b>${m.left}</b> of ${m.limit}<span>per minute</span></div></div>
     ${row("Today", `resets ${tLocal(u.day.resets)}`, u.day.used, u.day.limit, u.reserve)}
     ${row("This month", `resets ${dLocal(u.month.resets)}`, u.month.used, u.month.limit)}
-  </div>${withSync ? `<div class="vtq-foot"><span>${u.synced ? `Checked with VirusTotal ${ago2(new Date(u.synced * 1000).toISOString())}` : "Counted by Security Console"}${u.reserve ? ` · ${u.reserve} kept in reserve for your own checks` : ""}</span>
+  </div>${withSync ? `<div class="vtq-foot"><span>${u.synced ? `Checked with VirusTotal ${ago2(new Date(u.synced * 1000).toISOString())}` : "Counted by OmniShield"}${u.reserve ? ` · ${u.reserve} kept in reserve for your own checks` : ""}</span>
     <span class="sp"></span><button class="ghost sm" data-vt-sync>${IC("refresh")}Check usage</button></div>` : ""}`;
 }
 function wireSync(root) {
@@ -113,7 +113,7 @@ function drawPage(keep) {
   Q("#vtHeadCost").innerHTML = s.configured ? `${IC("clock")}${n0(s.usage.day.left)} lookups left today` : "";
   if (!s.configured) {
     body.innerHTML = `<div class="card vt-setup"><div><h2 style="font-size:20px;font-weight:650">Connect your free VirusTotal account</h2>
-      <p class="mute" style="margin-top:6px">VirusTotal checks files and links with more than 70 antivirus companies at once. A free account gives you 500 lookups a day - Security Console makes sure you never go over.</p>
+      <p class="mute" style="margin-top:6px">VirusTotal checks files and links with more than 70 antivirus companies at once. A free account gives you 500 lookups a day - OmniShield makes sure you never go over.</p>
       <ol><li>Create a free account at <b>virustotal.com</b> and sign in.</li><li>Click your name (top right), then <b>API key</b>.</li><li>Copy the key and paste it in <b>Settings > VirusTotal</b>.</li></ol>
       <div class="vt-acts"><button class="btn" id="vtGoSet">${IC("key")}Add my API key</button><a class="ghost" href="https://www.virustotal.com/gui/join-us" target="_blank" rel="noopener"><button class="ghost">${IC("ext")}Create a free account</button></a></div></div>
       <div class="callout info">${IC("info")}<div><b>What gets sent?</b> Files are identified only by their fingerprint (a SHA-256 code) - the file itself stays on your PC unless you choose to upload it. Links, websites and IP addresses you check are sent to VirusTotal.
@@ -126,7 +126,7 @@ function drawPage(keep) {
     <div class="card c8"><div class="vt-tabs" id="vtTabs">${TABS.map(([k, i, l]) => `<button data-t="${k}" class="${VT.tab === k ? "on" : ""}">${IC(i)}${l}</button>`).join("")}</div>
       <div id="vtForm"></div><div id="vtRes">${keepRes}</div></div>
     <div class="card c4"><h3>Your lookups <span class="sub">${s.cfg.plan === "free" ? "Free key" : "Custom limits"}</span></h3><div id="vtQ">${meters(s.usage)}</div>
-      <div class="callout info" style="margin-top:14px">${IC("info")}<div>Saved results are re-used for ${s.cfg.cache_days} day${s.cfg.cache_days > 1 ? "s" : ""} and don't use lookups. Security Console never goes over your limits.</div></div></div>
+      <div class="callout info" style="margin-top:14px">${IC("info")}<div>Saved results are re-used for ${s.cfg.cache_days} day${s.cfg.cache_days > 1 ? "s" : ""} and don't use lookups. OmniShield never goes over your limits.</div></div></div>
     <div class="card c12"><div class="ua-sec-h"><h3>Recent checks</h3><span class="sub mute">Click one to see it again - free</span></div><div id="vtHist"><div class="skel"></div></div></div></div>`;
   QA("#vtTabs button").forEach(b => b.onclick = () => { VT.tab = b.dataset.t; QA("#vtTabs button").forEach(x => x.classList.toggle("on", x === b)); drawForm(); });
   wireSync(Q("#vtQ")); drawForm(); loadHistory();
@@ -351,13 +351,13 @@ async function drawVtSettings() {
   const c = s.cfg, row = (t, h, ctl) => `<div class="srow"><div class="lbl"><b>${t}</b>${h ? `<span>${h}</span>` : ""}</div><div class="ctl">${ctl}</div></div>`;
   const tog = (on, k) => `<label class="switch sm"><input type="checkbox" ${on ? "checked" : ""} data-vk="${k}"><i></i></label>`;
   const sel = (cur, opts, k) => `<select data-vk="${k}">${opts.map(([v, l]) => `<option value="${v}" ${String(cur) === String(v) ? "selected" : ""}>${l}</option>`).join("")}</select>`;
-  b.innerHTML = `<div class="set-sec card"><h2>${IC("vtnav")}VirusTotal</h2><p>Check files and links with 70+ security companies. Security Console keeps track of every lookup and never goes over your limits.</p>
+  b.innerHTML = `<div class="set-sec card"><h2>${IC("vtnav")}VirusTotal</h2><p>Check files and links with 70+ security companies. OmniShield keeps track of every lookup and never goes over your limits.</p>
     ${row("API key", s.configured ? `Connected · ${E(s.key)}` : "Find it on virustotal.com: click your name, then API key.",
       s.configured ? `<button class="ghost sm" id="vtTest">${IC("check")}Test</button><button class="ghost sm" id="vtChange">${IC("key")}Change</button><button class="ghost sm" id="vtRemove">${IC("trash")}Remove</button>`
                    : `<input type="password" id="vtKey" class="vt-key-in" placeholder="Paste your 64-character key" style="width:320px" autocomplete="off"><button class="btn sm" id="vtSave">Save</button>`)}
     <div id="vtKeyEdit" class="hide" style="padding:0 0 14px"><div class="vt-form"><input type="password" id="vtKey2" class="vt-key-in" placeholder="Paste the new key" autocomplete="off"><button class="btn sm" id="vtSave2">Save new key</button></div></div>
     </div>
-    <div class="set-sec card"><h2>${IC("clock")}Lookup limits</h2><p>Security Console reserves each lookup before sending it, so it never goes over.</p>
+    <div class="set-sec card"><h2>${IC("clock")}Lookup limits</h2><p>OmniShield reserves each lookup before sending it, so it never goes over.</p>
     ${row("Your plan", "The free key allows 4 lookups a minute, 500 a day and 15,500 a month.", `<div class="seg" id="vtPlan">${[["free", "Free key"], ["custom", "Custom"]].map(([v, l]) => `<button data-v="${v}" class="${c.plan === v ? "on" : ""}">${l}</button>`).join("")}</div>`)}
     ${c.plan === "custom" ? row("Custom limits", "From your VirusTotal plan.", `<input type="number" min="1" value="${c.per_min}" data-vn="per_min" style="width:90px" title="per minute"> / min
       <input type="number" min="1" value="${c.per_day}" data-vn="per_day" style="width:110px" title="per day"> / day <input type="number" min="1" value="${c.per_month}" data-vn="per_month" style="width:120px" title="per month"> / month`) : ""}

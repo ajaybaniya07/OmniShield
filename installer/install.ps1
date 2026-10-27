@@ -1,6 +1,6 @@
 #Requires -RunAsAdministrator
 <#
-  Security Console - installer. Normally started by INSTALL.bat.
+  OmniShield - installer. Normally started by INSTALL.bat.
   Every step runs even if an earlier one fails; problems are listed at the end.
   Exit code = number of steps that had problems.
 #>
@@ -31,7 +31,7 @@ function Stop-Backend {
     Start-Sleep 2
 }
 
-Step 1 "Copying Security Console files to $Home_"
+Step 1 "Copying OmniShield files to $Home_"
 Stop-Backend
 New-Item -ItemType Directory -Force -Path "$Home_\tools\yara", "$Home_\tools\hayabusa", "$Home_\data", "$Home_\logs", "$Home_\quarantine", "$Home_\config" | Out-Null
 Copy-Item "$App\backend", "$App\ui", "$App\rules" $Home_ -Recurse -Force
@@ -70,7 +70,7 @@ Run "YARA / Hayabusa" {
     Pop-Location
 }
 
-Step 7 "Registering the Security Console background service"
+Step 7 "Registering the OmniShield background service"
 Run "Backend service" {
     $exe = "$Home_\backend\backend.exe"
     if (-not (Test-Path $exe)) { throw "backend.exe is missing from $Home_\backend" }
@@ -90,7 +90,7 @@ Run "Backend service" {
         & $nssm install SecurityConsole $exe | Out-Null
         & $nssm set SecurityConsole AppDirectory "$Home_\backend" | Out-Null
         & $nssm set SecurityConsole AppEnvironmentExtra "SC_HOME=$Home_" | Out-Null
-        & $nssm set SecurityConsole DisplayName "Security Console" | Out-Null
+        & $nssm set SecurityConsole DisplayName "OmniShield" | Out-Null
         & $nssm set SecurityConsole Description "Orchestrates ClamAV, YARA, osquery, Sysmon and Sigma (Hayabusa)" | Out-Null
         & $nssm set SecurityConsole Start SERVICE_AUTO_START | Out-Null
         & $nssm set SecurityConsole AppStdout "$Home_\logs\service.log" | Out-Null
@@ -105,7 +105,7 @@ Run "Backend service" {
         $principal = New-ScheduledTaskPrincipal -UserId "SYSTEM" -LogonType ServiceAccount -RunLevel Highest
         $settings  = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -StartWhenAvailable `
                        -ExecutionTimeLimit ([TimeSpan]::Zero) -RestartCount 999 -RestartInterval (New-TimeSpan -Minutes 1) -MultipleInstances IgnoreNew
-        Register-ScheduledTask -TaskName SecurityConsole -TaskPath "\" -Action $action -Trigger $trigger -Principal $principal -Settings $settings -Description "Security Console backend" | Out-Null
+        Register-ScheduledTask -TaskName SecurityConsole -TaskPath "\" -Action $action -Trigger $trigger -Principal $principal -Settings $settings -Description "OmniShield backend" | Out-Null
         Start-ScheduledTask -TaskName SecurityConsole
     }
 }
@@ -123,7 +123,7 @@ $checks = [ordered]@{
     "osquery"                 = if (Test-Path "C:\Program Files\osquery\osqueryi.exe") { "Installed" } else { "MISSING" }
     "YARA"                    = if (Test-Path "$Home_\tools\yara\yara64.exe") { "Installed" } else { "MISSING" }
     "Hayabusa (Sigma)"        = if (Test-Path "$Home_\tools\hayabusa\hayabusa.exe") { "Installed" } else { "MISSING" }
-    "Security Console"        = if (Get-Service SecurityConsole -ErrorAction SilentlyContinue) { (Get-Service SecurityConsole).Status }
+    "OmniShield"        = if (Get-Service SecurityConsole -ErrorAction SilentlyContinue) { (Get-Service SecurityConsole).Status }
                                 elseif (Get-ScheduledTask -TaskName SecurityConsole -ErrorAction SilentlyContinue) { (Get-ScheduledTask -TaskName SecurityConsole).State }
 }
 $up = $false

@@ -1,4 +1,4 @@
-/* Security Console add-on 1.9 - VirusTotal */
+/* OmniShield add-on 1.9 - VirusTotal */
 .vt-side{margin:10px 2px 0;padding:10px 12px;border-radius:12px;background:var(--surface2);border:1px solid var(--line);cursor:pointer;transition:.25s;font-size:12.3px;color:var(--mute)}
 .vt-side:hover{border-color:var(--brand)}
 .vt-side .r{display:flex;align-items:center;gap:8px}.vt-side b{color:var(--text);font-size:12.8px}

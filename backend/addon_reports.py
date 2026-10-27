@@ -1,8 +1,8 @@
 """
-Security Console add-on 1.8
+OmniShield add-on 1.8
   * User activity: sign-ins, wrong passwords, remote access, account changes and the
     programs each Windows user runs - with plain-English "unusual activity" findings.
-  * Security checkup: Windows and Security Console settings, with one-click fixes.
+  * Security checkup: Windows and OmniShield settings, with one-click fixes.
 Loaded by main.py (INSTALL-ADDON.bat adds the hook). Everything here is read-only:
 it never changes accounts or settings by itself.
 """
@@ -19,7 +19,7 @@ import xml.etree.ElementTree as ET
 
 from fastapi import HTTPException
 
-M = None                      # the main Security Console module (set by register)
+M = None                      # the main OmniShield module (set by register)
 SAMPLE_EVENTS = None          # tests only: {"Security": [...], "Sysmon": [...]}
 NS = "{http://schemas.microsoft.com/win/2004/08/events/event}"
 SYSMON = "Microsoft-Windows-Sysmon/Operational"
@@ -686,11 +686,11 @@ def checkup(refresh: bool = False) -> dict:
         checks.append({"id": cid, "group": group, "state": state, "title": title, "text": text, "fix": fix,
                        "nist_function": nist_func, "nist_id": nist_id})
 
-    # ---- Security Console ---- #
-    G = "Security Console"
+    # ---- OmniShield ---- #
+    G = "OmniShield"
     pause = M.pause_state() if hasattr(M, "pause_state") else {"paused": False}
     if pause.get("paused"):
-        add("paused", G, "bad", "Protection is paused", "Everything Security Console does is switched off right now.",
+        add("paused", G, "bad", "Protection is paused", "Everything OmniShield does is switched off right now.",
             {"label": "Resume protection", "action": "resume"}, nist_func="Protect", nist_id="PR.PO")
     rt = bool(getattr(M, "RT", None) and M.RT.running)
     add("realtime", G, "ok" if rt else "warn", "Real-time protection",
@@ -813,7 +813,7 @@ def checkup(refresh: bool = False) -> dict:
                 nist_func="Protect", nist_id="PR.PT-04")
     ok = sum(1 for c in checks if c["state"] == "ok")
     order = {"bad": 0, "warn": 1, "ok": 2}
-    checks.sort(key=lambda c: (c["group"] != "Security Console", order[c["state"]]))
+    checks.sort(key=lambda c: (c["group"] != "OmniShield", order[c["state"]]))
 
     nist_summary = {}
     for fn in ("Identify", "Protect", "Detect", "Respond", "Recover"):

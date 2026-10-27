@@ -1,5 +1,5 @@
 """
-Security Console add-on 1.9 - VirusTotal
+OmniShield add-on 1.9 - VirusTotal
   * Look up files (by fingerprint), folders, links, websites/IPs and hashes on VirusTotal
   * "Is this safe?" asks VirusTotal first, then runs the local antivirus + pattern rules
   * Strict quota guard: never goes over your per-minute, daily or monthly limits
@@ -251,7 +251,7 @@ def call(method: str, path: str, kind: str, target: str, data=None, ctype=None, 
         if code == "QuotaExceededError":
             _set("blocked_until", str(_next_day().timestamp()))
             threading.Thread(target=sync_quiet, daemon=True).start()
-            raise QuotaError("VirusTotal says this key's quota is used up. Security Console will wait until it resets.", which="day")
+            raise QuotaError("VirusTotal says this key's quota is used up. OmniShield will wait until it resets.", which="day")
         _set("blocked_until", str(time.time() + WINDOW))
         raise QuotaError("VirusTotal asked us to slow down. Trying again in a minute.", wait=WINDOW, which="minute")
     if status == 401:
@@ -665,7 +665,7 @@ def upload_job(jid: str, path: str) -> dict:
     cancelled = lambda: jid in M.JOB_CANCEL
     size = os.path.getsize(path)
     if size > MAX_UPLOAD:
-        raise VTError("Files over 32 MB can't be uploaded from Security Console. Use the VirusTotal website instead.")
+        raise VTError("Files over 32 MB can't be uploaded from OmniShield. Use the VirusTotal website instead.")
     h = M.sha256(path)
     M.set_progress(jid, phase="vt_submit", step="Uploading the file to VirusTotal…")
     b = "----SC" + uuid.uuid4().hex

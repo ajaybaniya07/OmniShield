@@ -1,3 +1,3 @@
 @echo off
-title Security Console
+title OmniShield
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0installer\open.ps1"

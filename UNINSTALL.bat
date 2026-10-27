@@ -13,8 +13,8 @@ exit /b
 
 :main
 cd /d "%~dp0"
-title Security Console - Uninstall
-echo This removes Security Console (C:\SecurityConsole, including history, quarantine and blocked programs).
+title OmniShield - Uninstall
+echo This removes OmniShield (C:\SecurityConsole, including history, quarantine and blocked programs).
 echo.
 choice /C YN /M "Continue"
 if errorlevel 2 exit /b

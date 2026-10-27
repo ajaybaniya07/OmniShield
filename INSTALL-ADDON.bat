@@ -13,9 +13,9 @@ exit /b
 
 :main
 cd /d "%~dp0"
-title Security Console - Add-on Sync & Update
+title OmniShield - Add-on Sync & Update
 echo =========================================================================
-echo   Security Console: Add-on Sync & In-Place Update
+echo   OmniShield: Add-on Sync & In-Place Update
 echo =========================================================================
 echo  Notice: INSTALL.bat now installs both Core and Add-ons in one step!
 echo  Use this script to re-apply, sync, or update add-ons at any time.

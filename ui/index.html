@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Security Console</title>
-<link rel="icon" href="/static/shield.ico">
+<title>OmniShield — Unified Windows Endpoint Defense</title>
+<link rel="icon" href="/static/logo.png">
 <style>
 @font-face{font-family:"InterSC";src:url("/static/fonts/InterVariable.woff2") format("woff2");font-weight:100 900;font-display:swap}
 :root{
@@ -596,7 +596,7 @@ html[data-motion=off] *,html[data-motion=off] *::before,html[data-motion=off] *:
 </defs></svg>
 
 <aside>
-  <div class="logo"><i><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg></i><span><b>Security Console</b><small>Endpoint protection</small></span></div>
+  <div class="logo"><img src="/static/logo.png" alt="OmniShield Logo" style="width:34px;height:34px;border-radius:8px;object-fit:cover;box-shadow:0 0 12px rgba(6,182,212,0.45);flex-shrink:0"><span><b>OmniShield</b><small>Endpoint Defense</small></span></div>
   <nav class="nav">
     <div class="ind" id="navInd"></div>
     <a data-p="home" class="on"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg><span class="lbl">Dashboard</span></a>
@@ -722,7 +722,7 @@ html[data-motion=off] *,html[data-motion=off] *::before,html[data-motion=off] *:
   <div class="bar">
     <div class="tabs" id="tTabs"><button class="on" data-v="new">To review</button><button data-v="ack">Ignored</button><button data-v="resolved">Resolved</button><button data-v="">All</button></div>
     <div class="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg><input id="q" placeholder="Search by name or file…"></div>
-    <select id="fEng"><option value="">All sources</option><option value="clamav">Antivirus</option><option value="yara">Pattern rules</option><option value="sigma">Suspicious behavior</option><option value="osquery">System changes</option><option value="console">Security Console</option></select>
+    <select id="fEng"><option value="">All sources</option><option value="clamav">Antivirus</option><option value="yara">Pattern rules</option><option value="sigma">Suspicious behavior</option><option value="osquery">System changes</option><option value="console">OmniShield</option></select>
     <select id="fOrigin"><option value="">Found by: anything</option><option value="realtime">Real-time protection</option><option value="scan">Scans</option><option value="schedule">Automatic checks</option></select>
     <select id="fMitre"><option value="">MITRE ATT&CK: All</option><option value="Initial Access">Initial Access</option><option value="Execution">Execution</option><option value="Persistence">Persistence</option><option value="Privilege Escalation">Privilege Escalation</option><option value="Defense Evasion">Defense Evasion</option><option value="Credential Access">Credential Access</option><option value="Discovery">Discovery</option><option value="Lateral Movement">Lateral Movement</option><option value="Collection">Collection</option><option value="Command and Control">Command & Control</option><option value="Exfiltration">Exfiltration</option><option value="Impact">Impact</option></select>
   </div>
@@ -911,7 +911,7 @@ function applyPrefs(){const d=document.documentElement,dark=PREFS.theme==="dark"
 matchMedia("(prefers-color-scheme: dark)").addEventListener("change",()=>{if(PREFS.theme==="system")applyPrefs()});
 
 /* ================= labels ================= */
-const SRC={clamav:["Antivirus","bug"],yara:["Pattern rule","file"],sigma:["Suspicious behavior","act"],osquery:["System change","pc"],console:["Security Console","shield"]};
+const SRC={clamav:["Antivirus","bug"],yara:["Pattern rule","file"],sigma:["Suspicious behavior","act"],osquery:["System change","pc"],console:["OmniShield","shield"]};
 const ORIGIN={realtime:"Real-time protection",scan:"A scan",schedule:"Automatic check"};
 const MOD={clamav:["Antivirus","ClamAV malware scanner","bug"],freshclam:["Virus definitions","Automatic updates","rocket"],
   yara:["Pattern rules","YARA file matching","file"],sigma:["Behavior detection","Sigma rules via Hayabusa","act"],
@@ -922,7 +922,7 @@ const good=v=>["running","ready"].includes(v);
 const PAGES={home:["Dashboard",""],threats:["Threats","Everything your security tools have found"],scan:["Scan","Check files, folders and drives"],
   check:["Check my PC","What's running and what starts with Windows"],quar:["Quarantine","Files locked away so they can't run"],
   excl:["Exclusions","Places scans and real-time protection skip"],activity:["Activity","Scans, checks and maintenance"],
-  settings:["Settings","Make Security Console work the way you like"],system:["My PC","Specs and live performance"],net:["Network","Programs using the internet right now"]};
+  settings:["Settings","Make OmniShield work the way you like"],system:["My PC","Specs and live performance"],net:["Network","Programs using the internet right now"]};
 
 /* ================= navigation ================= */
 let page="home";
@@ -949,7 +949,7 @@ async function stopProgram(path,pid){
   try{const r=await post("/api/processes/stop",pid?{pid}:{path});toast(r.stopped?`Stopped ${r.stopped} process${r.stopped>1?"es":""}`:"It wasn't running any more","stop");return true}catch(e){toast(e.message,"x");return false}}
 function blockDialog(path){return new Promise(res=>{
   const o=modal(`<h3>Block this program?</h3><p>${esc(path)}</p>
-   <label class="opt-row on"><input type="checkbox" checked data-k="run"><div><b>Don't let it run</b><span>If it starts, Security Console stops it within about 2 seconds. It's also stopped now if running.</span></div></label>
+   <label class="opt-row on"><input type="checkbox" checked data-k="run"><div><b>Don't let it run</b><span>If it starts, OmniShield stops it within about 2 seconds. It's also stopped now if running.</span></div></label>
    <label class="opt-row"><input type="checkbox" data-k="fw"><div><b>Block its internet access</b><span>Adds a Windows Firewall rule so it can't send or receive data.</span></div></label>
    <div class="row"><button class="ghost">Cancel</button><button class="danger">Block</button></div>`);optRows(o);
   const [c,k]=o.querySelectorAll(".row button");c.onclick=()=>{o.remove();res(false)};
@@ -1027,7 +1027,7 @@ async function details(id){
      ${x.fp?`<div class="box"><h4>${ic("eye")}Could it be a false alarm?</h4><p>${esc(x.fp)}</p></div>`:""}
      <div class="box" style="background:none"><h4>${ic("wrench")}Take action</h4><div class="acts-grid">${actions}</div></div>
      <details class="box" style="background:none"><summary>Technical details</summary>
-       <dl class="kv"><dt>Detected</dt><dd>${esc(e.time.replace("T"," "))}</dd><dt>Found by</dt><dd>${esc(ORIGIN[e.origin]||"Security Console")}</dd>
+       <dl class="kv"><dt>Detected</dt><dd>${esc(e.time.replace("T"," "))}</dd><dt>Found by</dt><dd>${esc(ORIGIN[e.origin]||"OmniShield")}</dd>
        <dt>Engine</dt><dd>${esc(e.engine)}</dd><dt>Rule</dt><dd>${esc(e.rule)}</dd><dt>MITRE ATT&CK</dt><dd>${esc(e.mitre_attack||x.mitre_attack||"None")}</dd><dt>Location</dt><dd>${esc(e.target)}</dd><dt>Status</dt><dd>${esc({new:"To review",ack:"Ignored",resolved:"Resolved"}[e.status]||e.status)}</dd></dl>
        ${e.details?`<div class="tech">${esc(e.details)}</div>`:""}</details>
    </div>`;
@@ -1157,7 +1157,7 @@ async function rtPoll(){let s;try{s=await api("/api/realtime");offlineFails=0;hi
   const alertable=ev.filter(e=>e.engine!=="console"&&(order[e.severity]??1)>=min);
   if(alertable.length){if(PREFS.sound==="on")beep();
     if(PREFS.popups==="on")alertable.slice(0,3).forEach(e=>toast(`${e.origin==="realtime"?"Live detection":"New detection"}: ${e.rule}`,"alert",()=>details(e.id)));
-    if(PREFS.desktop==="on"&&"Notification"in window&&Notification.permission==="granted"&&document.hidden)alertable.slice(0,2).forEach(e=>{try{const n=new Notification("Security Console: threat found",{body:`${e.rule}\n${fname(e.target)}`});n.onclick=()=>{window.focus();details(e.id)}}catch{}})}
+    if(PREFS.desktop==="on"&&"Notification"in window&&Notification.permission==="granted"&&document.hidden)alertable.slice(0,2).forEach(e=>{try{const n=new Notification("OmniShield: threat found",{body:`${e.rule}\n${fname(e.target)}`});n.onclick=()=>{window.focus();details(e.id)}}catch{}})}
   if(ev.length&&["home","threats"].includes(page))load()}
 
 /* ================= THREATS ================= */
@@ -1255,7 +1255,7 @@ async function repAct(i,a){const f=curReport.result.files[i];
     try{await post("/api/exclusions",{kind:"path",value:f.path,note:"Marked safe from a scan report"});toast("Marked as safe","check")}catch(e){toast(e.message,"x")}}}
 function exportReport(){const r=curReport.result,q=v=>`"${String(v??"").replace(/"/g,'""')}"`,rows=[["File","Level","Engine","Rule","What's wrong","Size","SHA256","Quarantined"]];
   r.files.forEach(f=>f.reasons.forEach(x=>rows.push([f.path,f.level,x.engine,x.rule,x.what,f.size,f.sha256,f.quarantined?"yes":"no"])));
-  const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([`Security Console scan report\nScanned: ${r.targets.join("; ")}\nDate: ${curReport.started}\nVerdict: ${r.verdict}\n\n`+rows.map(x=>x.map(q).join(",")).join("\r\n")],{type:"text/csv"}));a.download=`scan-report-${(curReport.started||"").slice(0,10)}.csv`;a.click()}
+  const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([`OmniShield scan report\nScanned: ${r.targets.join("; ")}\nDate: ${curReport.started}\nVerdict: ${r.verdict}\n\n`+rows.map(x=>x.map(q).join(",")).join("\r\n")],{type:"text/csv"}));a.download=`scan-report-${(curReport.started||"").slice(0,10)}.csv`;a.click()}
 
 /* ================= folder browser ================= */
 function pickPath({files=false,title="Choose a folder",start=""}={}){return new Promise(res=>{
@@ -1305,26 +1305,26 @@ function drawPause(p){PAUSE=p||{paused:false};const on=PAUSE.paused,b=$("#pauseB
 async function resumeAll(){try{drawPause(await post("/api/power/resume"));toast("Protection is back on","shield");rtPoll();load()}catch(e){toast(e.message,"x")}}
 function powerDialog(){
   if(PAUSE.paused){resumeAll();return}
-  const o=modal(`<h3>Pause all protection?</h3><p style="margin-bottom:6px">This stops everything Security Console runs in the background:</p>
+  const o=modal(`<h3>Pause all protection?</h3><p style="margin-bottom:6px">This stops everything OmniShield runs in the background:</p>
    <ul class="stoplist"><li>${ic("stop")}Antivirus scanner (ClamAV)</li><li>${ic("stop")}Virus definition updates</li><li>${ic("stop")}Activity monitor (Sysmon)</li>
    <li>${ic("stop")}Real-time protection</li><li>${ic("stop")}Automatic scans and checks</li><li>${ic("stop")}Blocked-program enforcement</li></ul>
    <p style="margin:10px 0 8px">You can still run scans yourself. Microsoft Defender keeps protecting you. Pause for:</p>
    <div class="choice-list"><button data-m="15">15 minutes<span>Back on by ${fmtTime(Date.now()+15*60000)}</span></button>
      <button data-m="60">1 hour<span>Back on by ${fmtTime(Date.now()+60*60000)}</span></button>
      <button data-m="0">Until I turn it on<span>Stays off, even after a restart</span></button></div>
-   <div class="exitrow"><div style="flex:1"><b>Close Security Console completely</b><span>Also stops the dashboard itself. Open it again with the desktop shortcut.</span></div><button class="danger sm" data-exit>${ic("x")}Close app</button></div>
+   <div class="exitrow"><div style="flex:1"><b>Close OmniShield completely</b><span>Also stops the dashboard itself. Open it again with the desktop shortcut.</span></div><button class="danger sm" data-exit>${ic("x")}Close app</button></div>
    <div class="row" style="margin-top:14px"><button class="ghost">Cancel</button></div>`,"wide");
   o.querySelector(".row .ghost").onclick=()=>o.remove();
   o.querySelectorAll("[data-m]").forEach(b=>b.onclick=async()=>{o.querySelectorAll("button").forEach(x=>x.disabled=true);
     try{drawPause(await post("/api/power/pause",{minutes:+b.dataset.m||null}));o.remove();toast("Protection paused","stop");rtPoll();load()}catch(e){toast(e.message,"x");o.remove()}});
   o.querySelector("[data-exit]").onclick=async()=>{o.remove();
-    if(!await confirmBox("Close Security Console?","Protection, real-time checks and this dashboard will all stop until you open Security Console again from the desktop shortcut or START Security Console.bat.","Close app"))return;
+    if(!await confirmBox("Close OmniShield?","Protection, real-time checks and this dashboard will all stop until you open OmniShield again from the desktop shortcut or START OmniShield.bat.","Close app"))return;
     if(!PAUSE.paused){try{await post("/api/power/pause",{minutes:null})}catch{}}
     try{await post("/api/power/exit")}catch{}showOffline(true)}}
 let offlineFails=0,closedByUser=false,exitAt=0;
 function showOffline(byUser){if(byUser){closedByUser=true;exitAt=Date.now()}if($(".offline"))return;const o=document.createElement("div");o.className="offline";
-  o.innerHTML=`<div class="box2"><div class="ic">${ic("x")}</div><h2>${closedByUser?"Security Console is closed":"Can't reach Security Console"}</h2>
-   <p>${closedByUser?"Everything has stopped. To start it again, use the <b>Security Console</b> desktop shortcut or <b>START Security Console.bat</b>. Protection stays paused until you click Resume.":"The background program isn't answering. It may be restarting - this page reconnects by itself. If it doesn't, open <b>START Security Console.bat</b>."}</p>
+  o.innerHTML=`<div class="box2"><div class="ic">${ic("x")}</div><h2>${closedByUser?"OmniShield is closed":"Can't reach OmniShield"}</h2>
+   <p>${closedByUser?"Everything has stopped. To start it again, use the <b>OmniShield</b> desktop shortcut or <b>START OmniShield.bat</b>. Protection stays paused until you click Resume.":"The background program isn't answering. It may be restarting - this page reconnects by itself. If it doesn't, open <b>START OmniShield.bat</b>."}</p>
    <button class="ghost" onclick="location.reload()">${ic("undo")}Try again</button></div>`;document.body.append(o)}
 function hideOffline(){if(closedByUser&&Date.now()-exitAt<15000)return;const o=$(".offline");if(o){o.remove();closedByUser=false;load()}}
 
@@ -1476,7 +1476,7 @@ function drawNet(){if(!NET)return;const items=netItems(),sysN=NET.programs.filte
   $("#netList").innerHTML=items.map(g=>{const k=(g.path||g.name).toLowerCase(),open=netOpen.has(k);
     const sub=g.internet?`Connected to <b>${g.internet_hosts}</b> internet address${g.internet_hosts>1?"es":""}`:g.connections?"Only talking to this PC or your home network":g.listening.length?`Waiting for connections on port ${g.listening.slice(0,3).join(", ")}${g.listening.length>3?"…":""}`:"No open connections";
     const badges=[g.internet?`<span class="bdg b-brand">${g.internet} connection${g.internet>1?"s":""}</span>`:"",g.open_to_network?`<span class="bdg b-warn">Open to your network</span>`:"",
-      g.firewall_blocked?`<span class="bdg b-ok">Internet blocked</span>`:"",g.self?`<span class="bdg b-brand">Security Console</span>`:g.system?`<span class="bdg b-mute">Windows</span>`:""].join("");
+      g.firewall_blocked?`<span class="bdg b-ok">Internet blocked</span>`:"",g.self?`<span class="bdg b-brand">OmniShield</span>`:g.system?`<span class="bdg b-mute">Windows</span>`:""].join("");
     return `<div class="hv netrow ${open?"open":""}" data-k="${esc(k)}"><div class="hv-row"><div class="av" style="background:${avColor(g.name)}">${esc(g.name.replace(/[^a-z0-9]/i,"").charAt(0).toUpperCase()||"?")}</div>
       <div class="hv-t"><b>${esc(g.name)}</b><span>${sub}</span></div><div class="hv-b">${badges}</div><svg class="chev2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></div>
       ${open?`<div class="hv-more">${netMore(g)}</div>`:""}</div>`}).join("")}
@@ -1485,7 +1485,7 @@ function netMore(g){const prot=g.system||!g.path;
   return `<dl class="kv2"><dt>Program file</dt><dd class="code">${esc(g.path||"Part of Windows")}</dd><dt>Process IDs</dt><dd>${g.pids.slice(0,12).join(", ")}${g.pids.length>12?"…":""}</dd>
     ${g.listening.length?`<dt>Waiting on ports</dt><dd>${g.listening.join(", ")} ${g.open_to_network?'<span class="warn-t">(other devices can connect)</span>':'<span class="mute">(this PC only)</span>'}</dd>`:""}</dl>
     ${rows?`<table class="ctable"><tr><th>Address</th><th>Port</th><th>Where</th><th>Status</th></tr>${rows}</table>${g.remotes.length>60?`<p class="mute" style="margin-top:6px">…and ${g.remotes.length-60} more</p>`:""}`:""}
-    ${prot?`<div class="callout info" style="margin-top:10px">${ic("info")}<div>${g.self?"This is part of Security Console.":"This is part of Windows, so it can't be stopped or blocked here."}</div></div>`:""}
+    ${prot?`<div class="callout info" style="margin-top:10px">${ic("info")}<div>${g.self?"This is part of OmniShield.":"This is part of Windows, so it can't be stopped or blocked here."}</div></div>`:""}
     <div class="hv-acts">${prot?"":g.firewall_blocked?`<button class="okb sm" data-a="allow">${ic("net")}Allow internet again</button>`:`<button class="danger sm" data-a="fw">${ic("nonet")}Block internet</button>`}
       ${prot?"":`<button class="warnb sm" data-a="stop">${ic("stop")}Stop program</button>`}
       ${g.path?`<button class="ghost sm" data-a="check">${ic("shield")}Is this safe?</button><button class="ghost sm" data-a="copy">${ic("copy")}Copy path</button>`:""}</div>`}
@@ -1530,19 +1530,19 @@ const VIEWS={
   processes:rs=>{const m=new Map();rs.forEach(r=>{const k=(r.path||r.name).toLowerCase();if(!m.has(k))m.set(k,[]);m.get(k).push(r)});
     return [...m.values()].map(g=>{const r=g[0],mem=g.reduce((a,x)=>a+(+x.memory||0),0),own=SELF_RE.test(r.path),sys=!r.path||isWinPath(r.path);
       return {key:"p:"+(r.path||r.name),title:r.name,sub:r.path?fldr(r.path):"Part of Windows",sys:sys||own,sort:-mem,path:r.path,
-        badges:[g.length>1?B(`${g.length} running`):null,mem?B(fmtSize(mem)):null,own?B("Security Console","b-brand"):sys?B("Windows","b-mute"):null].filter(Boolean),
+        badges:[g.length>1?B(`${g.length} running`):null,mem?B(fmtSize(mem)):null,own?B("OmniShield","b-brand"):sys?B("Windows","b-mute"):null].filter(Boolean),
         fields:[["Program file",r.path,1],["Running copies",g.length],["Memory used",fmtSize(mem)],["Started",r.started?ago(r.started):""],["Running as",r.user]],
         pids:g.map(x=>({pid:x.pid,cmd:x.cmdline,mem:x.memory,started:x.started}))}})},
   startup_items:rs=>rs.map(r=>{const p=exeOf(r.path)||r.path;return {key:"s:"+r.name+r.path,title:r.name,sub:startupWhere(r.source),sys:isWinPath(p),path:exeOf(r.path),
     st:{name:r.name,source:r.source,path:exeOf(r.path)||"",enabled:r.enabled},sort:r.enabled===false?1:0,
-    badges:[SELF_RE.test(p)?B("Security Console","b-brand"):null,r.enabled===true?B("On","b-ok"):r.enabled===false?B("Off","b-mute"):null].filter(Boolean),
+    badges:[SELF_RE.test(p)?B("OmniShield","b-brand"):null,r.enabled===true?B("On","b-ok"):r.enabled===false?B("Off","b-mute"):null].filter(Boolean),
     fields:[["Runs",r.path,1],["Set in",r.source,1],["For user",r.username],["Starts automatically",r.enabled===true?"Yes":r.enabled===false?"No - turned off":""]]}}),
   services:rs=>rs.map(r=>{const p=exeOf(r.path)||r.path,on=/auto|boot|system/i.test(r.start_type||"");
     return {key:"v:"+r.name,title:r.display_name||r.name,sub:startType(r.start_type),sys:isWinPath(p)||SELF_RE.test(p),path:exeOf(r.path),
-      badges:[SELF_RE.test(p)?B("Security Console","b-brand"):null,/disabled/i.test(r.start_type||"")?B("Off","b-mute"):on?B("Automatic","b-ok"):null].filter(Boolean),
+      badges:[SELF_RE.test(p)?B("OmniShield","b-brand"):null,/disabled/i.test(r.start_type||"")?B("Off","b-mute"):on?B("Automatic","b-ok"):null].filter(Boolean),
       fields:[["Service name",r.name],["Program",r.path,1],["Starts",startType(r.start_type)],["Runs as",r.user_account]]}}),
   scheduled_tasks:rs=>rs.map(r=>{const p=exeOf(r.action);return {key:"t:"+r.path,title:r.name,sub:p?"Runs "+fname(p):(r.action||"").slice(0,80),
-    sys:/^\\microsoft\\/i.test(r.path||"")||SELF_RE.test(p),path:p,badges:[SELF_RE.test(p)||/securityconsole/i.test(r.name)?B("Security Console","b-brand"):null].filter(Boolean),
+    sys:/^\\microsoft\\/i.test(r.path||"")||SELF_RE.test(p),path:p,badges:[SELF_RE.test(p)||/securityconsole/i.test(r.name)?B("OmniShield","b-brand"):null].filter(Boolean),
     fields:[["Task",r.path,1],["Runs",r.action,1],["Turned on",String(r.enabled)==="1"?"Yes":"No"]]}}),
   listening_ports:rs=>{const m=new Map();rs.forEach(r=>{const k=(r.path||r.name).toLowerCase();if(!m.has(k))m.set(k,[]);m.get(k).push(r)});
     return [...m.values()].map(g=>{const r=g[0],open=g.some(x=>!/^(127\.|::1$|localhost)/.test(x.address||"")),ports=[...new Set(g.map(x=>`${x.port} ${proto(x.protocol)}`))];
@@ -1557,7 +1557,7 @@ const VIEWS={
     sys:/microsoft/i.test(r.publisher||"")&&/(visual c\+\+|\.net|windows|update|webview|runtime|redistributable)/i.test(r.name||""),
     badges:r.install_date?[B("Installed "+fmtInstall(r.install_date),"b-mute")]:[],fields:[["Name",r.name],["Version",r.version],["Publisher",r.publisher],["Installed",fmtInstall(r.install_date)]]}))};
 const SYS_LABEL={processes:"Show Windows' own programs",services:"Show Windows services",scheduled_tasks:"Show Windows tasks",startup_items:"Show Windows items",
-  listening_ports:"Show Windows programs",installed_programs:"Show Windows components",unsigned_running:"Show Security Console tools"};
+  listening_ports:"Show Windows programs",installed_programs:"Show Windows components",unsigned_running:"Show OmniShield tools"};
 function hunt(id,title){huntId=id;showSys=false;openKeys.clear();$("#chkSys").checked=false;setChkMode("simple");showRows(title,post("/api/hunts/"+id).then(r=>r.rows))}
 function runSql(){huntId=null;showRows("Custom query",post("/api/query",{sql:$("#sql").value}))}
 async function showRows(title,p){$("#chkOut").classList.remove("hide");$("#chkT").textContent=title;$("#chkN").textContent="Loading…";
@@ -1590,7 +1590,7 @@ function hvMore(it){const f=it.fields.filter(x=>x[1]!==""&&x[1]!=null);
     it.path?`<button class="ghost sm" data-act="check">${ic("shield")}Is this safe?</button>`:"",
     it.path?`<button class="ghost sm" data-act="copy">${ic("copy")}Copy path</button>`:""].join("");
   return `<dl class="kv2">${f.map(x=>`<dt>${esc(x[0])}</dt><dd class="${x[2]?"code":""}">${esc(x[1])}</dd>`).join("")}</dl>${ps}
-    ${prot?`<div class="callout info" style="margin-top:10px">${ic("info")}<div>${SELF_RE.test(it.path)?"This is part of Security Console.":"This is part of Windows, so it can't be stopped or blocked here."}</div></div>`:""}
+    ${prot?`<div class="callout info" style="margin-top:10px">${ic("info")}<div>${SELF_RE.test(it.path)?"This is part of OmniShield.":"This is part of Windows, so it can't be stopped or blocked here."}</div></div>`:""}
     ${acts?`<div class="hv-acts">${acts}</div>`:""}`}
 $("#chkList").onclick=async e=>{const card=e.target.closest(".hv");if(!card)return;const it=VIEW[+card.dataset.i];const btn=e.target.closest("[data-act]");
   if(!btn){if(e.target.closest(".hv-more"))return;openKeys.has(it.key)?openKeys.delete(it.key):openKeys.add(it.key);card.outerHTML=hvItem(it);return}
@@ -1657,7 +1657,7 @@ async function drawSettings(){
   if(!S){S=await api("/api/settings")}
   $$("#setNav a").forEach(a=>a.classList.toggle("on",a.dataset.t===setTabName));
   const b=$("#setBody");let h="";
-  if(setTabName==="general")h=card("general","sun","Look & feel","How Security Console looks on this computer.",
+  if(setTabName==="general")h=card("general","sun","Look & feel","How OmniShield looks on this computer.",
     row("Theme","Follow Windows, or pick one.",seg(PREFS.theme,[["system","Automatic"],["light","Light"],["dark","Dark"]],'data-pref="theme"'))+
     row("Text size","Make everything a little bigger and easier to read.",seg(PREFS.size,[["normal","Normal"],["large","Large"]],'data-pref="size"'))+
     row("Animations","Turn off moving effects if you find them distracting.",seg(PREFS.motion,[["on","On"],["off","Off"]],'data-pref="motion"')));
@@ -1665,7 +1665,7 @@ async function drawSettings(){
     `<div class="srow" style="display:block"><div class="lbl"><b>Behavior alert sensitivity</b><span>Behavior rules (Sigma) watch Windows logs. More alerts catch more, but normal software like RGB lighting tools may trigger them.</span></div>
      <div class="sens" id="sens">${[["critical","Only critical","Very few alerts. Only the most dangerous activity.",1],["high","Fewer alerts","High and critical only. Recommended for most people.",2],["medium","Balanced","Also medium alerts. More false alarms from normal software.",3],["low","Everything","All alerts, including low. For experts.",4]]
        .map(([v,t,d,n])=>`<button data-v="${v}" class="${S.sigma_min_level===v?"on":""}"><span class="dots">${[1,2,3,4].map(k=>`<i class="${k<=n?"f":""}"></i>`).join("")}</span><b>${t}</b><span>${d}</span></button>`).join("")}</div></div>`+
-    row("Hide Security Console's own activity","Don't alert about things Security Console does itself - checking your PC, reading logs, opening this window. Recommended.",tog(S.hide_self,'data-k="hide_self"'))+
+    row("Hide OmniShield's own activity","Don't alert about things OmniShield does itself - checking your PC, reading logs, opening this window. Recommended.",tog(S.hide_self,'data-k="hide_self"'))+
     row("Include experimental rules","Newer rules that catch threats earlier but cause more false alarms.",tog(S.sigma_include_experimental,'data-k="sigma_include_experimental"'))+
     row("Pop-up alerts","Show a message in the corner when something new is found.",tog(PREFS.popups==="on",'data-pref-bool="popups"'))+
     row("Windows notifications","Also notify you when this window is in the background.",tog(PREFS.desktop==="on",'data-pref-bool="desktop"'))+
@@ -1680,7 +1680,7 @@ async function drawSettings(){
     `<div class="srow" style="display:block"><div class="lbl"><b>Extra folders to watch</b><span>Downloads, Desktop and Temp are always watched. Add others, like a USB drive or a shared folder.</span></div>
       <div style="margin-top:10px">${(S.rt_extra_folders||[]).map((f,i)=>`<div class="xitem"><div class="ic">${ic("folder")}</div><div style="flex:1;min-width:0"><div class="v">${esc(f)}</div></div><button class="ghost sm" data-rmf="${i}">${ic("x")}Remove</button></div>`).join("")}
       <button class="ghost sm mt" id="addFolder">${ic("folder")}Add a folder…</button></div></div>`);
-  else if(setTabName==="schedule")h=card("schedule","clock","Automatic scans","What Security Console does by itself, and when.",
+  else if(setTabName==="schedule")h=card("schedule","clock","Automatic scans","What OmniShield does by itself, and when.",
     row("Daily scan","Scan your PC once a day. If the PC is off at that time, it runs when you next turn it on.",tog(S.daily_scan_enabled,'data-k="daily_scan_enabled"'))+
     row("Time","",`<input type="time" value="${esc(S.daily_scan_time)}" data-k="daily_scan_time" ${S.daily_scan_enabled?"":"disabled"}>`)+
     row("What to scan","",seg(S.daily_scan_scope,[["quick","Quick scan"],["full","Full scan"]],'data-k="daily_scan_scope"'))+

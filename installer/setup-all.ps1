@@ -1,5 +1,5 @@
 <#
-  Security Console - complete setup. Started by INSTALL.bat / UPDATE.bat (as administrator).
+  OmniShield - complete setup. Started by INSTALL.bat / UPDATE.bat (as administrator).
   INSTALL: 1 Python  2 Download tools  3 Build backend.exe  4 Install everything  5 Start + check
   UPDATE (-UpdateOnly): 1 Python  3 Build  then replace the program files and restart.
 #>
@@ -27,7 +27,7 @@ function Find-Python {
 }
 function Wait-Up { for ($i = 0; $i -lt 45; $i++) { try { return Invoke-RestMethod "$Url/api/status" -TimeoutSec 3 } catch { Start-Sleep 2 } }; return $null }
 
-Write-Host $(if ($UpdateOnly) { "=== Security Console update ===" } else { "=== Security Console setup ===" }) -ForegroundColor Green
+Write-Host $(if ($UpdateOnly) { "=== OmniShield update ===" } else { "=== OmniShield setup ===" }) -ForegroundColor Green
 Write-Host "Folder: $Root"
 if ($Root.Length -gt 40) { Write-Host "Tip: this folder path is long. If a step fails, move the folder to C:\Build\SecurityConsole and run it again." -ForegroundColor Yellow }
 Get-ChildItem $Root -Recurse -File -ErrorAction SilentlyContinue | Unblock-File -ErrorAction SilentlyContinue
@@ -67,7 +67,7 @@ try {
         }
     }
 
-    Head 3 "Building the Security Console program (first time takes a few minutes)"
+    Head 3 "Building the OmniShield program (first time takes a few minutes)"
     $be = "$Root\backend"; $dist = "$be\dist\backend.exe"
     $srcTime = @((Get-Item "$be\main.py").LastWriteTime, (Get-Item "$be\requirements.txt").LastWriteTime) | Sort-Object | Select-Object -Last 1
     if ((Test-Path $dist) -and ((Get-Item $dist).LastWriteTime -gt $srcTime)) {
@@ -96,7 +96,7 @@ try {
     $installProblems = 0
     if ($UpdateOnly) {
         Head 4 "Replacing the program files (settings, history, blocked programs and quarantine are kept)"
-        if (-not (Test-Path "$Home_\backend\backend.exe")) { Stop-Setup "Security Console isn't installed yet. Run INSTALL.bat first." }
+        if (-not (Test-Path "$Home_\backend\backend.exe")) { Stop-Setup "OmniShield isn't installed yet. Run INSTALL.bat first." }
         $svc = Get-Service SecurityConsole -ErrorAction SilentlyContinue
         $task = Get-ScheduledTask -TaskName SecurityConsole -ErrorAction SilentlyContinue
         if ($svc) { Stop-Service SecurityConsole -Force -ErrorAction SilentlyContinue }
@@ -108,22 +108,22 @@ try {
         & "$Inst\shortcut.ps1" -Create -Url $Url
         if ($svc) { Start-Service SecurityConsole } elseif ($task) { Start-ScheduledTask -TaskName SecurityConsole } else { Stop-Setup "The background service isn't registered. Run INSTALL.bat instead." }
     } else {
-        Head 4 "Installing ClamAV, osquery, Sysmon, YARA, Hayabusa and Security Console"
+        Head 4 "Installing ClamAV, osquery, Sysmon, YARA, Hayabusa and OmniShield"
         Write-Host "This takes 5-10 minutes (ClamAV downloads its virus signatures)." -ForegroundColor Yellow
         & powershell.exe -NoProfile -ExecutionPolicy Bypass -File "$Inst\install.ps1" -NoBrowser
         $installProblems = $LASTEXITCODE
     }
 
-    Head 5 "Starting Security Console"
+    Head 5 "Starting OmniShield"
     $st = Wait-Up
-    if (-not $st) { Stop-Setup "Security Console didn't start. Double-click 'START Security Console.bat' - if that fails too, send the file $(Split-Path $Log -Leaf)." }
+    if (-not $st) { Stop-Setup "OmniShield didn't start. Double-click 'START OmniShield.bat' - if that fails too, send the file $(Split-Path $Log -Leaf)." }
     $names = @{ clamav = "Antivirus (ClamAV)"; freshclam = "Virus definitions"; yara = "Pattern rules (YARA)"; sigma = "Behavior detection (Sigma)"; sysmon = "Activity monitor (Sysmon)"; osquery = "System inspector (osquery)" }
     Write-Host ""
     foreach ($p in $st.engines.PSObject.Properties) {
         $ok = $p.Value -in "running", "ready"
         Write-Host ("   {0,-30} {1}" -f $names[$p.Name], $(if ($ok) { "Active" } else { $p.Value })) -ForegroundColor $(if ($ok) { "Green" } else { "Yellow" })
     }
-    Write-Host "`nSecurity Console $($st.version) is ready: $Url" -ForegroundColor Green
+    Write-Host "`nOmniShield $($st.version) is ready: $Url" -ForegroundColor Green
     if ($installProblems) { Write-Host "Some parts had problems (yellow above). If only the Antivirus is yellow, wait 5 minutes - it may still be loading virus signatures." -ForegroundColor Yellow }
     & "$Inst\shortcut.ps1" -Open -Url $Url
 } catch { Stop-Setup $_.Exception.Message }

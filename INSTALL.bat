@@ -13,9 +13,9 @@ exit /b
 
 :main
 cd /d "%~dp0"
-title Security Console - Unified Installation (Core + Addons)
+title OmniShield - Unified Installation (Core + Addons)
 echo ============================================================
-echo   Security Console 2.0: Unified Installation (Core + Add-ons)
+echo   OmniShield 2.0: Unified Installation (Core + Add-ons)
 echo ============================================================
 echo.
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0installer\setup-all.ps1"

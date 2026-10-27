@@ -1,6 +1,6 @@
 <#
-  Creates the "Security Console" shortcuts and opens the dashboard.
-  -Create : desktop + Start menu shortcuts. With Microsoft Edge they open Security Console
+  Creates the "OmniShield" shortcuts and opens the dashboard.
+  -Create : desktop + Start menu shortcuts. With Microsoft Edge they open OmniShield
             as its own maximized app window (no tabs or address bar).
   -Open   : opens the dashboard the same way, as the signed-in user (not as administrator).
 #>
@@ -12,22 +12,22 @@ $icon = "C:\SecurityConsole\ui\shield.ico"
 
 if ($Create) {
     foreach ($d in $dirs) {
-        Remove-Item "$d\Security Console.url", "$d\Security Console.lnk" -ErrorAction SilentlyContinue
+        Remove-Item "$d\OmniShield.url", "$d\OmniShield.lnk" -ErrorAction SilentlyContinue
         if ($edge) {
-            $s = (New-Object -ComObject WScript.Shell).CreateShortcut("$d\Security Console.lnk")
+            $s = (New-Object -ComObject WScript.Shell).CreateShortcut("$d\OmniShield.lnk")
             $s.TargetPath = $edge
             $s.Arguments = "--app=$Url --start-maximized"
-            $s.Description = "Security Console"
+            $s.Description = "OmniShield"
             $s.WindowStyle = 3   # maximized
             if (Test-Path $icon) { $s.IconLocation = $icon } else { $s.IconLocation = "$env:SystemRoot\System32\imageres.dll,-1028" }
             $s.Save()
         } else {
-            Set-Content -Path "$d\Security Console.url" -Value "[InternetShortcut]`r`nURL=$Url`r`n"
+            Set-Content -Path "$d\OmniShield.url" -Value "[InternetShortcut]`r`nURL=$Url`r`n"
         }
     }
 }
 if ($Open) {
     # explorer.exe starts it as the normal user, even from an administrator window
-    $lnk = $dirs | ForEach-Object { "$_\Security Console.lnk" } | Where-Object { Test-Path $_ } | Select-Object -First 1
+    $lnk = $dirs | ForEach-Object { "$_\OmniShield.lnk" } | Where-Object { Test-Path $_ } | Select-Object -First 1
     if ($lnk) { Start-Process explorer.exe -ArgumentList "`"$lnk`"" } else { Start-Process explorer.exe -ArgumentList $Url }
 }

@@ -1,5 +1,5 @@
 """
-Security Console - Pure Windows backend
+OmniShield - Pure Windows backend
 Orchestrates ClamAV, YARA, osquery, Hayabusa (Sigma) and Sysmon, stores every
 result in one SQLite database and serves the web UI on http://127.0.0.1:8080
 
@@ -54,7 +54,7 @@ VERSION = "1.7"
 # --------------------------------------------------------------------------- #
 # Paths & configuration
 # --------------------------------------------------------------------------- #
-BASE = pathlib.Path(os.environ.get("SC_HOME", r"C:\SecurityConsole"))
+BASE = pathlib.Path(os.environ.get("OMNISHIELD_HOME", os.environ.get("SC_HOME", r"C:\SecurityConsole")))
 CFG_FILE = BASE / "config" / "console.json"
 
 DEFAULT_CFG = {
@@ -87,7 +87,7 @@ DEFAULT_CFG = {
     "rt_sigma_seconds": 60,
     "rt_max_file_mb": 150,
     "rt_extra_folders": [],
-    "hide_self": True,                # don't alert about Security Console's own activity
+    "hide_self": True,                # don't alert about OmniShield's own activity
     # ---- advanced ----
     "scan_batch": 300,
     "rt_settle_seconds": 1.5,
@@ -149,7 +149,7 @@ OWN_PIDS: "collections.OrderedDict[int, float]" = collections.OrderedDict()
 
 
 def remember_pid(pid: int):
-    """Programs Security Console starts itself - their activity in Windows logs isn't a threat."""
+    """Programs OmniShield starts itself - their activity in Windows logs isn't a threat."""
     OWN_PIDS[pid] = time.time()
     OWN_PIDS.move_to_end(pid)
     while len(OWN_PIDS) > 5000:
@@ -221,7 +221,7 @@ with db() as _c:
             _c.execute(f"ALTER TABLE {tbl} ADD COLUMN {col} {ddl}")
     _c.execute("INSERT OR IGNORE INTO schema_version(version, applied_at) VALUES(2, ?)", (now(),))
     _c.execute("UPDATE jobs SET state='error', finished=?, result=? WHERE state='running'",
-               (now(), json.dumps({"error": "Interrupted (Security Console restarted)"})))
+               (now(), json.dumps({"error": "Interrupted (OmniShield restarted)"})))
 
 
 def get_setting(key: str, default: str = "") -> str:
@@ -317,7 +317,7 @@ def emit(engine, severity, rule, target, details="", uniq=None, origin="", mitre
 
 
 # --------------------------------------------------------------------------- #
-# Self-noise filter: Security Console's own activity is never a threat
+# Self-noise filter: OmniShield's own activity is never a threat
 # --------------------------------------------------------------------------- #
 PID_RE = re.compile(r"\b(?:PID|ParentPID|ProcessId|ParentProcessId|SrcPID|SourceProcessId)\s*[:=]\s*(\d+)", re.I)
 OWN_NAMES = ("sysmon64", "sysmondrv", "clamd", "freshclam", "osqueryd", "nssm.exe")
@@ -325,7 +325,7 @@ OWN_NAMES = ("sysmon64", "sysmondrv", "clamd", "freshclam", "osqueryd", "nssm.ex
 
 def self_markers() -> set[str]:
     port = str(CFG.get("port", 8080))
-    m = {str(BASE).lower(), f"127.0.0.1:{port}", f"localhost:{port}", "securityconsole", "security console", "sc-internal"}
+    m = {str(BASE).lower(), f"127.0.0.1:{port}", f"localhost:{port}", "securityconsole", "omnishield", "sc-internal"}
     m.update(d.lower() for d in own_dirs())
     return {x for x in m if len(x) > 3}
 
@@ -348,7 +348,7 @@ def is_self_row(row: dict) -> bool:
 
 
 def hide_self_alerts() -> int:
-    """Hide alerts that Security Console's own activity caused (also tidies up older versions' alerts)."""
+    """Hide alerts that OmniShield's own activity caused (also tidies up older versions' alerts)."""
     if not CFG.get("hide_self", True):
         return 0
     with db() as con:
@@ -367,7 +367,7 @@ def hide_self_alerts() -> int:
     if ids:
         with _db_lock, db() as con:
             con.executemany("UPDATE events SET status='ack' WHERE id=?", [(i,) for i in ids])
-        log.info("hid %d alerts caused by Security Console itself", len(ids))
+        log.info("hid %d alerts caused by OmniShield itself", len(ids))
     return len(ids)
 
 
@@ -456,7 +456,7 @@ def ingest_hayabusa(out: pathlib.Path, origin: str = "") -> int:
                 continue
             details = _hb_details(row.get("Details")) or _hb_details(row.get("ExtraFieldInfo"))
             if is_self_noise(f'{_hb_details(row.get("Details"))} {_hb_details(row.get("ExtraFieldInfo"))}'):
-                continue  # caused by Security Console itself
+                continue  # caused by OmniShield itself
             rule = row.get("RuleTitle", "Sigma rule")
             ts = row.get("Timestamp", "")
             target = f'{row.get("Computer", "")} / {row.get("Channel", "")} / EID {row.get("EventID", "")}'
@@ -518,7 +518,7 @@ def under(path: str, folder: str) -> bool:
 
 
 def builtin_exclusions() -> list[dict]:
-    items = [(str(BASE), "Security Console's own files, rules and logs"),
+    items = [(str(BASE), "OmniShield's own files, rules and logs"),
              (CFG["quarantine"], "Quarantined files are already locked away"),
              (str(pathlib.Path(CFG["clamscan"]).parent), "ClamAV program and virus database")]
     if os.name == "nt":
@@ -1226,7 +1226,7 @@ CRITICAL_NAMES = {"system", "system idle process", "registry", "smss.exe", "csrs
 
 
 def own_dirs() -> list[str]:
-    """Folders of Security Console and the tools it runs (never stopped, blocked or scanned in real time)."""
+    """Folders of OmniShield and the tools it runs (never stopped, blocked or scanned in real time)."""
     out = []
     for d in (str(BASE), str(pathlib.Path(CFG["clamscan"]).parent), str(pathlib.Path(CFG["osqueryi"]).parent)):
         nd = norm(d).rstrip("\\/")
@@ -1245,10 +1245,10 @@ def protected_reason(path: str) -> str | None:
     if name in CRITICAL_NAMES:
         return "This is a core part of Windows. Stopping it would crash or log off the PC."
     if os.name == "nt" and under(n, windir):
-        return "This program is part of Windows, so Security Console won't stop or block it."
+        return "This program is part of Windows, so OmniShield won't stop or block it."
     for d in own_dirs():
         if under(n, d):
-            return "This is one of Security Console's own tools."
+            return "This is one of OmniShield's own tools."
     return None
 
 
@@ -1316,7 +1316,7 @@ def stop_path(path: str, quiet: bool = False) -> dict:
 
 
 def fw_rule_name(path: str) -> str:
-    return f"Security Console block {hashlib.sha1(norm(path).encode()).hexdigest()[:8]} {os.path.basename(path)}"[:240]
+    return f"OmniShield block {hashlib.sha1(norm(path).encode()).hexdigest()[:8]} {os.path.basename(path)}"[:240]
 
 
 def firewall_block(path: str, block: bool):
@@ -1616,11 +1616,11 @@ def explain_event(e: dict) -> dict:
         out.update(title=topic["title"], what=topic["what"], steps=topic["steps"], fp=topic["fp"])
     elif eng == "osquery":
         key = rule.replace("New: ", "")
-        t = HUNT_TOPICS.get(key, ("A change to your PC", "Security Console noticed a change since the last check.",
+        t = HUNT_TOPICS.get(key, ("A change to your PC", "OmniShield noticed a change since the last check.",
                                   ["If you made this change, mark it Resolved."]))
         out.update(title=t[0], what=t[1], steps=t[2], fp="Usually caused by software you installed or updated.")
     else:
-        out.update(title=rule, what=e.get("details") or "A note from Security Console.",
+        out.update(title=rule, what=e.get("details") or "A note from OmniShield.",
                    steps=["No action needed."], fp="")
     why = protected_reason(program) if program else "No program file was found for this alert."
     file_exists = bool(program) and os.path.isfile(program)
@@ -1706,7 +1706,7 @@ def run_hunt(name: str, record: bool = True) -> dict:
             first = con.execute("SELECT COUNT(*) FROM baseline WHERE hunt=?", (name,)).fetchone()[0] == 0
             for r in rows:
                 if is_self_row(r):
-                    continue  # Security Console's own tasks, services and ports
+                    continue  # OmniShield's own tasks, services and ports
                 k = "|".join(str(r.get(x, "")) for x in h["key"])
                 rh = hashlib.sha1(k.encode()).hexdigest()
                 if con.execute("INSERT OR IGNORE INTO baseline VALUES(?,?,?)", (name, rh, now())).rowcount and not first:
@@ -2525,7 +2525,7 @@ def pause_all(minutes: int | None) -> dict:
         set_setting("paused_until", until)
         set_setting("paused_since", now())
     how = "until you turn it back on" if until == "forever" else f"for {minutes} minutes"
-    emit("console", "medium", "Protection paused", "Security Console",
+    emit("console", "medium", "Protection paused", "OmniShield",
          details=f"All protection was paused {how}. Stopped: {', '.join(stopped) or 'no running services'}.",
          uniq=f"pause|{now()}")
     return pause_state()
@@ -2548,7 +2548,7 @@ def resume_all(reason: str = "You turned protection back on.") -> dict:
         set_setting("paused_services", "[]")
         if get_setting("rt_before_pause", "0") == "1":
             RT.start()
-    emit("console", "low", "Protection resumed", "Security Console", details=reason, uniq=f"resume|{now()}")
+    emit("console", "low", "Protection resumed", "OmniShield", details=reason, uniq=f"resume|{now()}")
     return pause_state()
 
 
@@ -2571,7 +2571,7 @@ def pause_watchdog():
 
 
 def exit_app():
-    """Stop the Security Console background program itself (and stop it restarting)."""
+    """Stop the OmniShield background program itself (and stop it restarting)."""
     log.info("Exit requested from the dashboard")
     RT.stop()
     if os.name == "nt":
@@ -3006,7 +3006,7 @@ def system_live(lite: bool = False) -> dict:
 # --------------------------------------------------------------------------- #
 # API
 # --------------------------------------------------------------------------- #
-app = FastAPI(title="Security Console", version=VERSION)
+app = FastAPI(title="OmniShield", version=VERSION)
 
 
 @app.middleware("http")
@@ -3192,7 +3192,7 @@ def _start():
         psutil.cpu_percent(None)
     if get_setting("realtime", "0") == "1" and not is_paused():
         RT.start()
-    log.info("Security Console %s started on %s:%s", VERSION, CFG["host"], CFG["port"])
+    log.info("OmniShield %s started on %s:%s", VERSION, CFG["host"], CFG["port"])
 
 
 @app.get("/api/status")
@@ -3367,7 +3367,7 @@ def stop_process(req: StopReq):
         raise HTTPException(400, str(e))
     if res.get("stopped"):
         emit("console", "low", "Program stopped", res.get("path") or req.path or str(req.pid),
-             details="Stopped from Security Console.")
+             details="Stopped from OmniShield.")
     return res
 
 

@@ -1,22 +1,22 @@
-/* Security Console add-on 1.8
+/* OmniShield add-on 1.8
    - User activity: who signs in, how, and anything unusual (per person)
-   - Security checkup: Windows + Security Console settings with one-click fixes
+   - Security checkup: Windows + OmniShield settings with one-click fixes
    - Getting started checklist on the Dashboard
    - Printable reports (Print / Save as PDF)
-   Works on top of Security Console 1.7. Nothing here changes settings by itself. */
+   Works on top of OmniShield 1.7. Nothing here changes settings by itself. */
 (function () {
 "use strict";
 const Q = s => document.querySelector(s), QA = s => [...document.querySelectorAll(s)];
 const E = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const fn = n => typeof window[n] === "function" ? window[n] : null;
 const GET = async u => { const r = await fetch(u, {cache: "no-store"}); const j = await r.json().catch(() => ({})); if (!r.ok) throw new Error(j.detail || r.statusText); return j; };
-const pg = () => { try { return page; } catch { return ""; } };          // "page" is Security Console's current page
+const pg = () => { try { return page; } catch { return ""; } };          // "page" is OmniShield's current page
 const say = (m, k = "check") => fn("toast") ? toast(m, k) : console.log(m);
 const goto = p => fn("go") && go(p);
 const LS = k => localStorage.getItem(k) === "1";
 const EMPTY = (t, s) => `<div class="empty"><b>${t}</b>${s ? "<br>" + s : ""}</div>`;
 
-/* ---- icons (added to Security Console's icon set) ---- */
+/* ---- icons (added to OmniShield's icon set) ---- */
 const MY = {
   users: '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/>',
   clip: '<rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/>',
@@ -67,7 +67,7 @@ if (fn("moveInd")) requestAnimationFrame(moveInd);
 const main = Q("main");
 main.insertAdjacentHTML("beforeend", `
 <section id="p-users" class="hide">
-  <div class="ua-printhead"><div><b>User activity report</b><br><span id="uaPH"></span></div><span>Security Console</span></div>
+  <div class="ua-printhead"><div><b>User activity report</b><br><span id="uaPH"></span></div><span>OmniShield</span></div>
   <div class="head"><div><h1>User activity</h1><p>Who signs in to this PC, how they sign in, and anything unusual - in plain English.</p></div>
     <div class="ua-tools no-print"><span class="ua-upd hide" id="uaUpd"><i></i>Updating…</span>
       <div class="seg" id="uaDays"><button data-v="1">24 hours</button><button data-v="7">7 days</button><button data-v="14" class="on">14 days</button><button data-v="30">30 days</button></div>
@@ -75,13 +75,13 @@ main.insertAdjacentHTML("beforeend", `
   <div id="uaBody"></div>
 </section>
 <section id="p-checkup" class="hide">
-  <div class="ua-printhead"><div><b>Security checkup</b><br><span id="ckPH"></span></div><span>Security Console</span></div>
+  <div class="ua-printhead"><div><b>Security checkup</b><br><span id="ckPH"></span></div><span>OmniShield</span></div>
   <div class="head"><div><h1>Security checkup</h1><p>A quick look at the settings that keep your PC safe. Fix anything amber or red with one click.</p></div>
     <div class="ua-tools no-print"><button class="ghost" id="ckRun">${IC("refresh")}Check again</button><button class="ghost" id="ckPrint">${IC("print")}Print</button></div></div>
   <div id="ckBody"></div>
 </section>`);
 
-/* ---- hook into Security Console's page loader ---- */
+/* ---- hook into OmniShield's page loader ---- */
 const _load = fn("load");
 window.load = function () {
   const p = pg();
@@ -143,7 +143,7 @@ async function loadUsers(refresh) {
   if (r.error && !r.data) { Q("#uaBody").innerHTML = `<div class="callout">${IC("alert")}<div>${E(r.error)}</div></div>`; return; }
   if (!r.data) {
     Q("#uaBody").innerHTML = `<div class="card"><div class="ua-loading"><div class="ua-spin"></div><b>Reading Windows sign-in records…</b>
-      <span>This takes a few seconds the first time. Security Console looks at sign-ins, wrong passwords, account changes and the programs each person runs.</span></div></div>`;
+      <span>This takes a few seconds the first time. OmniShield looks at sign-ins, wrong passwords, account changes and the programs each person runs.</span></div></div>`;
     return;
   }
   if (r.data === UA.data) return;
@@ -322,10 +322,10 @@ async function loadCheckup(refresh) {
         <span class="ck-count ok">${IC("check", 'style="width:14px;height:14px"')}${d.ok} good</span></div></div>
       <span class="mute" style="font-size:12.5px;align-self:end">Checked ${ago2(d.time)}</span></div>
     ${nistCards(d.nist_summary)}
-    ${Object.entries(groups).map(([g, cs]) => `<div class="card c6"><h3>${g === "Windows" ? "Windows" : "Security Console"} <span class="sub">${cs.filter(c => c.state === "ok").length} of ${cs.length} good</span></h3>
+    ${Object.entries(groups).map(([g, cs]) => `<div class="card c6"><h3>${g === "Windows" ? "Windows" : "OmniShield"} <span class="sub">${cs.filter(c => c.state === "ok").length} of ${cs.length} good</span></h3>
       <div class="ck-list">${cs.map(ckRow).join("")}</div></div>`).join("")}
     <div class="card c12"><div class="callout info" style="margin:0">${IC("info")}<div>Buttons marked ${IC("ext", 'style="width:14px;height:14px;vertical-align:-2px"')} open the right page in Windows Settings or Windows Security - Windows may ask before opening it.
-      Security Console never changes Windows settings by itself.</div></div></div></div>`;
+      OmniShield never changes Windows settings by itself.</div></div></div></div>`;
   wireFixes(body); animRing(body); animateBars(body); setCheckBadge(d);
 }
 function setCheckBadge(d) { const b = Q("#nb-checkup"); if (b) { b.textContent = d.bad; b.classList.toggle("hide", !d.bad); } }
@@ -397,7 +397,7 @@ async function gettingStarted() {
   const n = steps.filter(s => s.done).length;
   if (n === steps.length) { card.classList.add("hide"); return; }
   card.classList.remove("hide");
-  card.innerHTML = `<div class="gs-h"><div class="ic">${IC("star")}</div><div><b>Get the most out of Security Console</b><span>${steps.length - n} quick step${steps.length - n > 1 ? "s" : ""} left to set up your protection.</span></div>
+  card.innerHTML = `<div class="gs-h"><div class="ic">${IC("star")}</div><div><b>Get the most out of OmniShield</b><span>${steps.length - n} quick step${steps.length - n > 1 ? "s" : ""} left to set up your protection.</span></div>
       <div class="gs-prog"><div class="tr"><i style="width:${n / steps.length * 100}%"></i></div><small>${n} of ${steps.length} done</small></div>
       <button class="gs-x" title="Hide" id="gsHide">${IC("x")}</button></div>
     <div class="gs-steps">${steps.map((s, i) => `<div class="gs-step ${s.done ? "done" : ""}"><span class="ck">${IC("check")}</span><div class="t"><b>${s.t}</b><span>${s.d}</span></div>

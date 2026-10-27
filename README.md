@@ -1,4 +1,8 @@
-# 🛡️ Security Console 2.0 (Framework Edition)
+<div align="center">
+  <img src="ui/logo.png" width="160" alt="OmniShield Logo" style="border-radius: 20px;" />
+  <h1>🛡️ OmniShield 2.0</h1>
+  <p><b>Unified Multi-Engine Windows Endpoint Defense & Threat Hunting Platform</b></p>
+</div>
 
 [![Platform: Windows 11 / 10 (x64)](https://img.shields.io/badge/Platform-Windows%2011%20%7C%2010%20(x64)-blue.svg?logo=windows)](https://microsoft.com/windows)
 [![Python 3.12](https://img.shields.io/badge/Python-3.12-3776AB.svg?logo=python&logoColor=white)](https://python.org)
@@ -14,7 +18,7 @@
 ---
 
 ## 📋 Table of Contents
-- [What is Security Console?](#-what-is-security-console)
+- [What is OmniShield?](#-what-is-omnishield)
 - [Key Features](#-key-features)
 - [How It Works (Architecture)](#-how-it-works-architecture)
 - [Detection & Telemetry Engines](#-detection--telemetry-engines)
@@ -28,11 +32,11 @@
 
 ---
 
-## 🎯 What is Security Console?
+## 🎯 What is OmniShield?
 
 Most modern Security Operations Center (SOC) workstations and endpoint defense suites require heavy virtualization, Linux environments, or third-party cloud agents that send internal data offsite.
 
-**Security Console** is an open-source, purely native Windows endpoint defense system. It unifies five battle-tested security engines (**Microsoft Sysmon, Sigma rules via Hayabusa, YARA, ClamAV, and osquery**) into a unified local SQLite event bus with a sleek real-time management dashboard running on `http://127.0.0.1:8080`.
+**OmniShield** is an open-source, purely native Windows endpoint defense system. It unifies five battle-tested security engines (**Microsoft Sysmon, Sigma rules via Hayabusa, YARA, ClamAV, and osquery**) into a unified local SQLite event bus with a sleek real-time management dashboard running on `http://127.0.0.1:8080`.
 
 It empowers system administrators, security analysts, and enthusiasts to detect active tradecraft, analyze suspicious binaries, monitor baseline drift, and instantly isolate compromised processes with 1-click controls.
 
@@ -114,7 +118,7 @@ It empowers system administrators, security analysts, and enthusiasts to detect 
 
 ## 🧮 Multi-Factor Risk Scoring Engine
 
-Rather than inundating analysts with generic alerts, Security Console evaluates alerts through an algorithmic multi-factor scoring pipeline:
+Rather than inundating analysts with generic alerts, OmniShield evaluates alerts through an algorithmic multi-factor scoring pipeline:
 
 | Factor | Points | Description |
 | :--- | :---: | :--- |
@@ -145,7 +149,7 @@ Rather than inundating analysts with generic alerts, Security Console evaluates 
 2. Right-click **`INSTALL.bat`** and select **Run as Administrator** (or double-click and accept the UAC prompt).  
    *The installer automatically fetches security binaries, configures ClamAV and Sysmon, binds all add-ons, and compiles the native service.*
 3. Launch the console:
-   Double-click **`START Security Console.bat`** or use the desktop shortcut.
+   Double-click **`START OmniShield.bat`** or use the desktop shortcut.
 4. Access the dashboard in your browser:
    **[http://127.0.0.1:8080](http://127.0.0.1:8080)**
 
@@ -154,7 +158,7 @@ Rather than inundating analysts with generic alerts, Security Console evaluates 
 | Script | Purpose |
 | :--- | :--- |
 | **`INSTALL.bat`** | **Unified Installer:** Installs Core engines + all Add-ons in one automated pass. |
-| **`START Security Console.bat`** | Launches the background service and opens the web console. |
+| **`START OmniShield.bat`** | Launches the background service and opens the web console. |
 | **`INSTALL-ADDON.bat`** | Re-syncs or updates add-on scripts without running a full engine reinstall. |
 | **`UPDATE.bat`** | Rebuilds `backend.exe` while strictly preserving your alerts, settings, and mutes. |
 | **`FIX-ClamAV.bat`** | Diagnostic helper to reinstall or repair ClamAV daemon services. |
@@ -196,7 +200,7 @@ SecurityConsole/
 
 ## 🧪 Automated Testing & Safety Net
 
-Security Console includes an automated fuzzing and resilience test suite verifying that all input parsers (Mark-of-the-Web streams, Unicode filenames, PE entropy calculators, and auth codes) handle corrupted or hostile data without crashing the backend service.
+OmniShield includes an automated fuzzing and resilience test suite verifying that all input parsers (Mark-of-the-Web streams, Unicode filenames, PE entropy calculators, and auth codes) handle corrupted or hostile data without crashing the backend service.
 
 To run the automated suite:
 ```cmd
@@ -216,16 +220,16 @@ python tests/run_tests.py
 
 ## 🛡️ Threat Model & Honest Disclosures
 
-Security Console is designed with honest security engineering principles:
+OmniShield is designed with honest security engineering principles:
 
-### What Security Console DOES:
+### What OmniShield DOES:
 - Provides immediate visibility across Windows event logs, process executions, and network behaviors.
 - Maps adversary actions to MITRE ATT&CK techniques in real time.
 - Gives defenders 1-click tools to terminate processes, hash-lock binaries, and block malicious IPs.
 - Protects its own local REST API using ACL-restricted tokens, CSRF tokens, strict host headers, and Content Security Policy.
 
-### What Security Console CANNOT Do (Keep Microsoft Defender ON):
-- **No Kernel Driver (User-Space Operation):** Security Console runs as a standard Windows service with `SYSTEM` privileges. It does not install a proprietary kernel driver (ELAM or minifilter). It terminates threats within seconds of execution, but cannot intercept file execution in pre-boot kernel space. **Always keep Microsoft Defender active for kernel-level protection.**
+### What OmniShield CANNOT Do (Keep Microsoft Defender ON):
+- **No Kernel Driver (User-Space Operation):** OmniShield runs as a standard Windows service with `SYSTEM` privileges. It does not install a proprietary kernel driver (ELAM or minifilter). It terminates threats within seconds of execution, but cannot intercept file execution in pre-boot kernel space. **Always keep Microsoft Defender active for kernel-level protection.**
 - **Administrator-Level Compromise:** If an attacker already possesses Administrator or `NT AUTHORITY\SYSTEM` privileges, they can terminate user-mode processes.
 
 ### Data Privacy:
@@ -248,7 +252,7 @@ Security Console is designed with honest security engineering principles:
 
 ## 📜 Licenses & Acknowledgments
 
-Security Console orchestrates premier open-source detection tools. All credit to their respective authors:
+OmniShield orchestrates premier open-source detection tools. All credit to their respective authors:
 
 | Component | Author / Project | License |
 | :--- | :--- | :--- |

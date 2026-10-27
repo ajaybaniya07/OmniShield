@@ -27,9 +27,14 @@ if (-not (Test-Path $exe)) { Write-Host "OmniShield isn't installed yet. Double-
 
 Write-Host "Starting OmniShield..."
 $svc = Get-Service SecurityConsole -ErrorAction SilentlyContinue
-$task = Get-ScheduledTask -TaskName SecurityConsole -ErrorAction SilentlyContinue
-if ($svc) { Start-Service SecurityConsole -ErrorAction SilentlyContinue }
+if ($svc) {
+    if ($svc.Status -eq "Paused") { Resume-Service SecurityConsole -ErrorAction SilentlyContinue }
+    if ((Get-Service SecurityConsole -ErrorAction SilentlyContinue).Status -ne "Running") {
+        Start-Service SecurityConsole -ErrorAction SilentlyContinue
+    }
+}
 elseif ($task) { Start-ScheduledTask -TaskName SecurityConsole }
+
 else {
     $a = New-ScheduledTaskAction -Execute $exe -WorkingDirectory "$Home_\backend"
     $t = New-ScheduledTaskTrigger -AtStartup

@@ -106,7 +106,11 @@ try {
         Copy-Item "$app\backend", "$app\ui", "$app\rules" $Home_ -Recurse -Force
         try { & "$Inst\clamav.ps1" -Payload "$Inst\payload" -App $app -Home_ $Home_ } catch { Write-Host "   ClamAV: $($_.Exception.Message)" -ForegroundColor Yellow; $installProblems++ }
         & "$Inst\shortcut.ps1" -Create -Url $Url
-        if ($svc) { Start-Service SecurityConsole } elseif ($task) { Start-ScheduledTask -TaskName SecurityConsole } else { Stop-Setup "The background service isn't registered. Run INSTALL.bat instead." }
+        if ($svc) {
+            if ($svc.Status -eq "Paused") { Resume-Service SecurityConsole -ErrorAction SilentlyContinue }
+            Start-Service SecurityConsole -ErrorAction SilentlyContinue
+        } elseif ($task) { Start-ScheduledTask -TaskName SecurityConsole } else { Stop-Setup "The background service isn't registered. Run INSTALL.bat instead." }
+
     } else {
         Head 4 "Installing ClamAV, osquery, Sysmon, YARA, Hayabusa and OmniShield"
         Write-Host "This takes 5-10 minutes (ClamAV downloads its virus signatures)." -ForegroundColor Yellow

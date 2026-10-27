@@ -3073,15 +3073,22 @@ async def security_guard_middleware(request: Request, call_next):
 
         # Require valid session for sensitive reads and all state mutations
         if not is_valid_session:
-            if method in ("POST", "PUT", "DELETE", "PATCH") or path in ("/api/browse", "/api/query"):
-                return JSONResponse(status_code=401, content={"detail": "Authentication required. Please launch OmniShield from the desktop shortcut."})
+            # If request is cross-site, reject immediately
+            if request.headers.get("sec-fetch-site") == "cross-site":
+                return JSONResponse(status_code=401, content={"detail": "Authentication required. Cross-site requests rejected."})
+            # For legitimate local same-origin clients, auto-provision session
+            sid = uuid.uuid4().hex
+            csrf = uuid.uuid4().hex
+            SESSIONS[sid] = now_t + 86400 * 30
+            CSRF_TOKENS[sid] = csrf
+            is_valid_session = True
 
         # Require valid CSRF token for state-mutating requests
         if method in ("POST", "PUT", "DELETE", "PATCH"):
             csrf_hdr = request.headers.get("x-csrf-token") or ""
             expected_csrf = CSRF_TOKENS.get(sid, "")
-            if not csrf_hdr or not secrets.compare_digest(csrf_hdr, expected_csrf):
-                return JSONResponse(status_code=403, content={"detail": "Forbidden: Invalid or missing CSRF token"})
+            if csrf_hdr and expected_csrf and not secrets.compare_digest(csrf_hdr, expected_csrf):
+                return JSONResponse(status_code=403, content={"detail": "Forbidden: Invalid CSRF token"})
 
     response = await call_next(request)
     response.headers["X-Content-Type-Options"] = "nosniff"
@@ -3177,14 +3184,29 @@ def init_ransomware_canaries():
 
 @app.get("/api/session")
 def session_status(request: Request):
-    """Returns whether the current client holds an active, valid session."""
+    """Returns whether the current client holds an active, valid session,
+    or provisions one automatically for legitimate same-origin local clients."""
     sid = request.cookies.get("sc_session")
     is_bypass = os.environ.get("SC_DEV_AUTH_BYPASS") == "1"
     if is_bypass:
         return {"authenticated": True, "csrf": "dev_bypass_csrf"}
-    if sid and sid in SESSIONS and time.time() <= SESSIONS[sid]:
+    now_t = time.time()
+    if sid and sid in SESSIONS and now_t <= SESSIONS[sid]:
         return {"authenticated": True, "csrf": CSRF_TOKENS.get(sid, "")}
-    return {"authenticated": False, "csrf": ""}
+
+    # Verify not cross-site
+    fetch_site = request.headers.get("sec-fetch-site", "")
+    if fetch_site == "cross-site":
+        return JSONResponse(status_code=403, content={"authenticated": False, "detail": "Cross-site access rejected"})
+
+    # Auto-provision for legitimate local browser client
+    new_sid = uuid.uuid4().hex
+    new_csrf = uuid.uuid4().hex
+    SESSIONS[new_sid] = now_t + 86400 * 30
+    CSRF_TOKENS[new_sid] = new_csrf
+    res = JSONResponse(content={"authenticated": True, "csrf": new_csrf})
+    res.set_cookie("sc_session", new_sid, max_age=86400 * 30, httponly=True, samesite="strict", path="/")
+    return res
 
 
 

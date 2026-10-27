@@ -872,13 +872,14 @@ const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&
 window._csrfToken = "";
 const getCsrfHeaders = () => window._csrfToken ? {"X-CSRF-Token": window._csrfToken} : {};
 
-const api=async(u,o={})=>{
+const api=async(u,o={},retry=true)=>{
   const h = {"Content-Type":"application/json", ...getCsrfHeaders(), ...(o.headers||{})};
   const r=await fetch(u,{...o, headers: h});
   const j=await r.json().catch(()=>({}));
   if(!r.ok){
-    if(r.status === 401 && typeof toast === "function") {
-      toast("Authentication required. Please launch OmniShield from your shortcut.", "alert");
+    if(r.status === 401 && retry) {
+      await initAuthSession();
+      return api(u, o, false);
     }
     throw new Error(j.detail||r.statusText);
   }

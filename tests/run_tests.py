@@ -30,6 +30,19 @@ for mod_name in ["uvicorn", "fastapi", "fastapi.responses", "fastapi.staticfiles
                         setattr(self, k, v)
             mock_mod.BaseModel = MockBaseModel
 
+        if mod_name == "fastapi.responses":
+            class MockJSONResponse:
+                def __init__(self, content=None, status_code=200, **kwargs):
+                    self.content = content or {}
+                    self.status_code = status_code
+                    self.headers = {}
+                    self.cookies = {}
+                    import json
+                    self.body = json.dumps(self.content).encode()
+                def set_cookie(self, key, value, **kwargs):
+                    self.cookies[key] = value
+            mock_mod.JSONResponse = MockJSONResponse
+
         if mod_name == "fastapi":
             class MockHTTPException(Exception):
                 def __init__(self, status_code=400, detail=""):
@@ -230,6 +243,23 @@ class TestInputParsersSafetyNet(unittest.TestCase):
         valid_req = main.SessionReq(code=code_res["code"])
         session_res = main.session_exchange(valid_req)
         self.assertIsNotNone(session_res)
+
+        # Cross-site session rejection
+        req_cross = MagicMock()
+        req_cross.cookies = {}
+        req_cross.headers = {"sec-fetch-site": "cross-site"}
+        res_cross = main.session_status(req_cross)
+        self.assertEqual(res_cross.status_code, 403)
+
+        # Local same-origin auto-provisioning
+        req_local = MagicMock()
+        req_local.cookies = {}
+        req_local.headers = {"sec-fetch-site": "same-origin"}
+        res_local = main.session_status(req_local)
+        import json
+        body = json.loads(res_local.body.decode())
+        self.assertTrue(body["authenticated"])
+        self.assertTrue(bool(body["csrf"]))
 
     # 11. Browse restricted directories enforcement
     def test_restricted_directory_browse_block(self):

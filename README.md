@@ -1,5 +1,6 @@
 <div align="center">
-  <img src="ui/logo.png" width="160" alt="OmniShield Logo" style="border-radius: 20px;" />
+  <img src="ui/banner.png" width="720" alt="OmniShield EDR Cybersecurity Banner" style="border-radius: 16px;" />
+  <br/><br/>
   <h1>🛡️ OmniShield 2.0</h1>
   <p><b>Unified Multi-Engine Windows Endpoint Defense & Threat Hunting Platform</b></p>
 </div>

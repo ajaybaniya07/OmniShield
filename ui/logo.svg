@@ -1,0 +1,154 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" width="100%" height="100%">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@800;900&amp;display=swap');
+      .brand-title {
+        font-family: 'Montserrat', system-ui, -apple-system, sans-serif;
+        font-weight: 900;
+        letter-spacing: 14px;
+        fill: #ffffff;
+      }
+      .brand-subtitle {
+        font-family: 'Montserrat', system-ui, -apple-system, sans-serif;
+        font-weight: 800;
+        letter-spacing: 9px;
+        fill: #00e5ff;
+      }
+    </style>
+
+    <!-- Deep Tech Slate Background -->
+    <radialGradient id="bgGrad" cx="50%" cy="42%" r="65%">
+      <stop offset="0%" stop-color="#141a24"/>
+      <stop offset="55%" stop-color="#0c1017"/>
+      <stop offset="100%" stop-color="#06080c"/>
+    </radialGradient>
+
+    <!-- Electric Cyan Neon Gradient -->
+    <linearGradient id="neonCyan" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00ffff"/>
+      <stop offset="60%" stop-color="#00d8f6"/>
+      <stop offset="100%" stop-color="#00b4d8"/>
+    </linearGradient>
+
+    <!-- Glowing Vector Filter -->
+    <filter id="vectorGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="4" result="blur1"/>
+      <feGaussianBlur stdDeviation="12" result="blur2"/>
+      <feMerge>
+        <feMergeNode in="blur2"/>
+        <feMergeNode in="blur1"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <filter id="softAura" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="40"/>
+    </filter>
+  </defs>
+
+  <!-- Canvas Background -->
+  <rect width="1000" height="1000" rx="48" fill="url(#bgGrad)"/>
+
+  <!-- Backlight Glow Aura -->
+  <circle cx="500" cy="400" r="220" fill="#00e5ff" opacity="0.14" filter="url(#softAura)"/>
+
+  <!-- EMBLEM GROUP -->
+  <g transform="translate(0, 5)">
+    <!-- 1. OUTER SHIELD FRAME -->
+    <!-- Pointed top, wide faceted shoulders, straight drop, dynamic taper -->
+    <path d="M500,140 
+             L695,225 
+             L695,430 
+             C695,575 605,670 500,725 
+             C395,670 305,575 305,430 
+             L305,225 Z" 
+          fill="none" 
+          stroke="url(#neonCyan)" 
+          stroke-width="22" 
+          stroke-linejoin="round"
+          stroke-linecap="round"
+          filter="url(#vectorGlow)"/>
+
+    <!-- 2. INNER CIRCUIT TRACKS (LEFT & TOP) -->
+    <!-- Left interior stepped circuit contour -->
+    <path d="M450,210 
+             L360,250 
+             L360,405 
+             L410,455" 
+          fill="none" 
+          stroke="url(#neonCyan)" 
+          stroke-width="16" 
+          stroke-linejoin="round" 
+          stroke-linecap="round"/>
+
+    <!-- Top right circuit notch -->
+    <path d="M500,210 L545,230" 
+          stroke="url(#neonCyan)" 
+          stroke-width="16" 
+          stroke-linecap="round"/>
+
+    <!-- Right lower circuit guide -->
+    <path d="M640,360 L640,430 C640,515 580,590 500,645" 
+          fill="none" 
+          stroke="url(#neonCyan)" 
+          stroke-width="14" 
+          stroke-linejoin="round" 
+          stroke-linecap="round"
+          opacity="0.85"/>
+
+    <!-- Bottom V notch bracket -->
+    <path d="M385,550 C435,605 470,630 500,650 C530,630 565,605 615,550" 
+          fill="none" 
+          stroke="url(#neonCyan)" 
+          stroke-width="16" 
+          stroke-linejoin="round" 
+          stroke-linecap="round"/>
+
+    <!-- Right small data connector dot -->
+    <circle cx="630" cy="470" r="9" fill="#00ffff" filter="url(#vectorGlow)"/>
+
+    <!-- 3. CENTRAL "O" LOGOMARK -->
+    <circle cx="500" cy="425" r="95" 
+            fill="none" 
+            stroke="url(#neonCyan)" 
+            stroke-width="32" 
+            stroke-linecap="round"
+            filter="url(#vectorGlow)"/>
+
+    <!-- Dark inner mask circle -->
+    <circle cx="500" cy="425" r="60" fill="#0c1017"/>
+
+    <!-- 4. DYNAMIC EDR ARROW (BREAKOUT ↗) -->
+    <!-- Arrow shaft cutting diagonally across the O center -->
+    <line x1="455" y1="470" x2="620" y2="305" 
+          stroke="url(#neonCyan)" 
+          stroke-width="26" 
+          stroke-linecap="round"
+          filter="url(#vectorGlow)"/>
+
+    <!-- Dynamic triangular arrow head -->
+    <path d="M555,285 
+             L665,260 
+             L640,370 
+             L600,330 Z" 
+          fill="url(#neonCyan)" 
+          stroke="url(#neonCyan)" 
+          stroke-width="4" 
+          stroke-linejoin="round"
+          filter="url(#vectorGlow)"/>
+  </g>
+
+  <!-- 5. TYPOGRAPHY: OMNISHIELD -->
+  <text x="508" y="835" 
+        text-anchor="middle" 
+        class="brand-title" 
+        font-size="64">OMNISHIELD</text>
+
+  <!-- 6. SUBTITLE: • EDR CYBERSECURITY • -->
+  <text x="506" y="890" 
+        text-anchor="middle" 
+        class="brand-subtitle" 
+        font-size="24">
+    <tspan fill="#00e5ff">•</tspan> EDR CYBERSECURITY <tspan fill="#00e5ff">•</tspan>
+  </text>
+</svg>

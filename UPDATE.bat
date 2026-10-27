@@ -24,8 +24,24 @@ if exist "%~dp0SHA256SUMS" (
     )
 )
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0installer\setup-all.ps1" -UpdateOnly
+if errorlevel 1 goto :has_error
+goto :success
+
+:has_error
 echo.
-echo ------------------------------------------------------------
-echo  Finished. Read the messages above, then press any key.
-echo ------------------------------------------------------------
-pause >nul
+echo ============================================================
+echo  Update encountered an issue or warning.
+echo  Please review the details above.
+echo ============================================================
+pause
+exit /b 1
+
+:success
+echo.
+echo ============================================================
+echo  OmniShield updated successfully!
+echo  Closing this window automatically...
+echo ============================================================
+timeout /t 3 >nul 2>&1 || ping -n 3 127.0.0.1 >nul 2>&1
+exit /b 0
+

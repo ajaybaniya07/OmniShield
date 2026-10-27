@@ -34,9 +34,24 @@ if errorlevel 1 (
 )
 echo.
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0installer\setup-all.ps1" -UpdateOnly
+if errorlevel 1 goto :has_error
+goto :success
+
+:has_error
 echo.
-echo ------------------------------------------------------------
-echo  Finished. Read the messages above, then press any key.
-echo  In the dashboard press Ctrl+F5 once to load the new pages.
-echo ------------------------------------------------------------
-pause >nul
+echo ============================================================
+echo  Add-on sync encountered an issue or warning.
+echo  Please review the details above.
+echo ============================================================
+pause
+exit /b 1
+
+:success
+echo.
+echo ============================================================
+echo  OmniShield add-ons synced and updated successfully!
+echo  Closing this window automatically...
+echo ============================================================
+timeout /t 3 >nul 2>&1 || ping -n 3 127.0.0.1 >nul 2>&1
+exit /b 0
+

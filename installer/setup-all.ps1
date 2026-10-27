@@ -124,8 +124,32 @@ try {
         Write-Host ("   {0,-30} {1}" -f $names[$p.Name], $(if ($ok) { "Active" } else { $p.Value })) -ForegroundColor $(if ($ok) { "Green" } else { "Yellow" })
     }
     Write-Host "`nOmniShield $($st.version) is ready: $Url" -ForegroundColor Green
-    if ($installProblems) { Write-Host "Some parts had problems (yellow above). If only the Antivirus is yellow, wait 5 minutes - it may still be loading virus signatures." -ForegroundColor Yellow }
+
+    # If protection was paused, unpause it so OmniShield starts active
+    if ($st.pause -and $st.pause.paused) {
+        Write-Host "Resuming protection..." -ForegroundColor Cyan
+        try {
+            $bootFile = "$Home_\config\.auth_bootstrap"
+            if (Test-Path $bootFile) {
+                $token = (Get-Content $bootFile -Raw).Trim()
+                $res = Invoke-RestMethod "$Url/api/auth/code" -Method Post -Headers @{ "Authorization" = "Bearer $token" } -TimeoutSec 3
+                if ($res.code) {
+                    $sRes = Invoke-RestMethod "$Url/api/session" -Method Post -Body (@{ code = $res.code } | ConvertTo-Json) -ContentType "application/json" -TimeoutSec 3
+                    if ($sRes.csrf) {
+                        Invoke-RestMethod "$Url/api/power/resume" -Method Post -Headers @{ "X-CSRF-Token" = $sRes.csrf } -TimeoutSec 3 | Out-Null
+                    }
+                }
+            }
+        } catch { Write-Host "Notice: $($_.Exception.Message)" -ForegroundColor DarkGray }
+    }
+
     & "$Inst\shortcut.ps1" -Open -Url $Url
+    if ($installProblems) {
+        Write-Host "`nNotice: Some parts had problems (yellow above). If only the Antivirus is yellow, wait 5 minutes - it may still be loading virus signatures." -ForegroundColor Yellow
+        Stop-Transcript | Out-Null
+        exit 2
+    }
 } catch { Stop-Setup $_.Exception.Message }
 Stop-Transcript | Out-Null
 exit 0
+

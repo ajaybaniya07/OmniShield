@@ -8,147 +8,126 @@
         letter-spacing: 14px;
         fill: #ffffff;
       }
-      .brand-subtitle {
+      .brand-sub {
         font-family: 'Montserrat', system-ui, -apple-system, sans-serif;
         font-weight: 800;
-        letter-spacing: 9px;
-        fill: #00e5ff;
+        letter-spacing: 8px;
+        fill: #38bdf8;
       }
     </style>
 
-    <!-- Deep Tech Slate Background -->
-    <radialGradient id="bgGrad" cx="50%" cy="42%" r="65%">
-      <stop offset="0%" stop-color="#141a24"/>
-      <stop offset="55%" stop-color="#0c1017"/>
-      <stop offset="100%" stop-color="#06080c"/>
+    <!-- Dark Slate Cyber Background -->
+    <radialGradient id="bgGrad" cx="50%" cy="40%" r="65%">
+      <stop offset="0%" stop-color="#141c2b"/>
+      <stop offset="60%" stop-color="#0a0e17"/>
+      <stop offset="100%" stop-color="#05070c"/>
     </radialGradient>
 
-    <!-- Electric Cyan Neon Gradient -->
-    <linearGradient id="neonCyan" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#00ffff"/>
-      <stop offset="60%" stop-color="#00d8f6"/>
-      <stop offset="100%" stop-color="#00b4d8"/>
+    <!-- Deep Navy Shield Fill -->
+    <linearGradient id="shieldNavy" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1a3f6d"/>
+      <stop offset="50%" stop-color="#112f53"/>
+      <stop offset="100%" stop-color="#0b203a"/>
     </linearGradient>
 
-    <!-- Glowing Vector Filter -->
-    <filter id="vectorGlow" x="-20%" y="-20%" width="140%" height="140%">
-      <feGaussianBlur stdDeviation="4" result="blur1"/>
-      <feGaussianBlur stdDeviation="12" result="blur2"/>
+    <!-- Bright Cyan / Turquoise Orbital Ribbon Gradient -->
+    <linearGradient id="cyanRibbon" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#06b6d4"/>
+      <stop offset="35%" stop-color="#22d3ee"/>
+      <stop offset="70%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#7dd3fc"/>
+    </linearGradient>
+
+    <linearGradient id="backRibbon" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0284c7"/>
+      <stop offset="100%" stop-color="#0369a1"/>
+    </linearGradient>
+
+    <!-- Neon Glow Filter -->
+    <filter id="ribbonGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
       <feMerge>
-        <feMergeNode in="blur2"/>
-        <feMergeNode in="blur1"/>
+        <feMergeNode in="blur"/>
         <feMergeNode in="SourceGraphic"/>
       </feMerge>
     </filter>
 
-    <filter id="softAura" x="-40%" y="-40%" width="180%" height="180%">
+    <filter id="softGlow" x="-40%" y="-40%" width="180%" height="180%">
       <feGaussianBlur stdDeviation="40"/>
     </filter>
   </defs>
 
-  <!-- Canvas Background -->
+  <!-- Background -->
   <rect width="1000" height="1000" rx="48" fill="url(#bgGrad)"/>
 
-  <!-- Backlight Glow Aura -->
-  <circle cx="500" cy="400" r="220" fill="#00e5ff" opacity="0.14" filter="url(#softAura)"/>
+  <!-- Cyan Ambient Lighting -->
+  <circle cx="500" cy="400" r="230" fill="#00d2ff" opacity="0.14" filter="url(#softGlow)"/>
 
-  <!-- EMBLEM GROUP -->
-  <g transform="translate(0, 5)">
-    <!-- 1. OUTER SHIELD FRAME -->
-    <!-- Pointed top, wide faceted shoulders, straight drop, dynamic taper -->
-    <path d="M500,140 
-             L695,225 
-             L695,430 
-             C695,575 605,670 500,725 
-             C395,670 305,575 305,430 
-             L305,225 Z" 
-          fill="none" 
-          stroke="url(#neonCyan)" 
-          stroke-width="22" 
-          stroke-linejoin="round"
-          stroke-linecap="round"
-          filter="url(#vectorGlow)"/>
+  <g transform="translate(0, 0)">
+    <!-- 1. ORBITAL RIBBON: BACK SEGMENT (Behind top-right shoulder) -->
+    <path d="M 545,260 
+             C 610,250 655,275 665,315 
+             C 673,355 640,405 585,450 
+             L 560,425 
+             C 605,390 628,355 622,330 
+             C 615,302 575,285 528,290 Z" 
+          fill="url(#backRibbon)"/>
 
-    <!-- 2. INNER CIRCUIT TRACKS (LEFT & TOP) -->
-    <!-- Left interior stepped circuit contour -->
-    <path d="M450,210 
-             L360,250 
-             L360,405 
-             L410,455" 
-          fill="none" 
-          stroke="url(#neonCyan)" 
-          stroke-width="16" 
-          stroke-linejoin="round" 
-          stroke-linecap="round"/>
+    <!-- 2. OUTER SHIELD (NAVY BLUE) -->
+    <path d="M 500,240 
+             L 620,310 
+             L 620,530 
+             C 620,645 555,718 500,760 
+             C 445,718 380,645 380,530 
+             L 380,310 Z" 
+          fill="url(#shieldNavy)" 
+          stroke="#091a2f" 
+          stroke-width="3"/>
 
-    <!-- Top right circuit notch -->
-    <path d="M500,210 L545,230" 
-          stroke="url(#neonCyan)" 
-          stroke-width="16" 
-          stroke-linecap="round"/>
+    <!-- 3. NEGATIVE SPACE CHANNEL (CREATES DOUBLE-SHIELD BORDER) -->
+    <path d="M 500,295 
+             L 582,345 
+             L 582,515 
+             C 582,605 538,662 500,698 
+             C 462,662 418,605 418,515 
+             L 418,345 Z" 
+          fill="#0a0e17"/>
 
-    <!-- Right lower circuit guide -->
-    <path d="M640,360 L640,430 C640,515 580,590 500,645" 
-          fill="none" 
-          stroke="url(#neonCyan)" 
-          stroke-width="14" 
-          stroke-linejoin="round" 
-          stroke-linecap="round"
-          opacity="0.85"/>
+    <!-- 4. INNER SHIELD (NAVY BLUE) -->
+    <path d="M 500,330 
+             L 560,368 
+             L 560,498 
+             C 560,572 525,622 500,652 
+             C 475,622 440,572 440,498 
+             L 440,368 Z" 
+          fill="url(#shieldNavy)"/>
 
-    <!-- Bottom V notch bracket -->
-    <path d="M385,550 C435,605 470,630 500,650 C530,630 565,605 615,550" 
-          fill="none" 
-          stroke="url(#neonCyan)" 
-          stroke-width="16" 
-          stroke-linejoin="round" 
-          stroke-linecap="round"/>
-
-    <!-- Right small data connector dot -->
-    <circle cx="630" cy="470" r="9" fill="#00ffff" filter="url(#vectorGlow)"/>
-
-    <!-- 3. CENTRAL "O" LOGOMARK -->
-    <circle cx="500" cy="425" r="95" 
-            fill="none" 
-            stroke="url(#neonCyan)" 
-            stroke-width="32" 
-            stroke-linecap="round"
-            filter="url(#vectorGlow)"/>
-
-    <!-- Dark inner mask circle -->
-    <circle cx="500" cy="425" r="60" fill="#0c1017"/>
-
-    <!-- 4. DYNAMIC EDR ARROW (BREAKOUT ↗) -->
-    <!-- Arrow shaft cutting diagonally across the O center -->
-    <line x1="455" y1="470" x2="620" y2="305" 
-          stroke="url(#neonCyan)" 
-          stroke-width="26" 
-          stroke-linecap="round"
-          filter="url(#vectorGlow)"/>
-
-    <!-- Dynamic triangular arrow head -->
-    <path d="M555,285 
-             L665,260 
-             L640,370 
-             L600,330 Z" 
-          fill="url(#neonCyan)" 
-          stroke="url(#neonCyan)" 
-          stroke-width="4" 
-          stroke-linejoin="round"
-          filter="url(#vectorGlow)"/>
+    <!-- 5. ORBITAL RIBBON: FRONT SEGMENT (Sweeps in front from lower-left across the shield) -->
+    <path d="M 345,515 
+             C 335,585 348,642 400,672 
+             C 465,708 545,678 595,625 
+             C 635,578 662,508 668,432 
+             C 670,395 658,355 638,332 
+             L 608,355 
+             C 622,375 632,408 630,438 
+             C 625,495 602,555 565,595 
+             C 525,638 460,660 415,635 
+             C 378,612 368,572 378,525 Z" 
+          fill="url(#cyanRibbon)" 
+          filter="url(#ribbonGlow)"/>
   </g>
 
-  <!-- 5. TYPOGRAPHY: OMNISHIELD -->
-  <text x="508" y="835" 
+  <!-- 6. TYPOGRAPHY: OMNISHIELD -->
+  <text x="506" y="855" 
         text-anchor="middle" 
         class="brand-title" 
         font-size="64">OMNISHIELD</text>
 
-  <!-- 6. SUBTITLE: • EDR CYBERSECURITY • -->
-  <text x="506" y="890" 
+  <!-- 7. SUBTITLE: • EDR CYBERSECURITY • -->
+  <text x="504" y="908" 
         text-anchor="middle" 
-        class="brand-subtitle" 
-        font-size="24">
-    <tspan fill="#00e5ff">•</tspan> EDR CYBERSECURITY <tspan fill="#00e5ff">•</tspan>
+        class="brand-sub" 
+        font-size="23">
+    <tspan fill="#38bdf8">•</tspan> EDR CYBERSECURITY <tspan fill="#38bdf8">•</tspan>
   </text>
 </svg>

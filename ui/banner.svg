@@ -12,7 +12,7 @@
         font-family: 'Montserrat', system-ui, -apple-system, sans-serif;
         font-weight: 800;
         letter-spacing: 10px;
-        fill: #00e5ff;
+        fill: #38bdf8;
       }
       .banner-tag {
         font-family: system-ui, -apple-system, sans-serif;
@@ -22,105 +22,78 @@
       }
     </style>
 
-    <radialGradient id="bannerBg" cx="35%" cy="50%" r="75%">
+    <radialGradient id="bannerBg" cx="30%" cy="50%" r="75%">
       <stop offset="0%" stop-color="#141c2b"/>
       <stop offset="60%" stop-color="#0a0e17"/>
       <stop offset="100%" stop-color="#05070c"/>
     </radialGradient>
 
-    <linearGradient id="neonCyan" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#00ffff"/>
-      <stop offset="60%" stop-color="#00d8f6"/>
-      <stop offset="100%" stop-color="#00b4d8"/>
+    <linearGradient id="shieldNavy" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1a3f6d"/>
+      <stop offset="50%" stop-color="#112f53"/>
+      <stop offset="100%" stop-color="#0b203a"/>
     </linearGradient>
 
-    <filter id="vectorGlow" x="-20%" y="-20%" width="140%" height="140%">
-      <feGaussianBlur stdDeviation="4" result="blur1"/>
-      <feGaussianBlur stdDeviation="12" result="blur2"/>
+    <linearGradient id="cyanRibbon" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#06b6d4"/>
+      <stop offset="35%" stop-color="#22d3ee"/>
+      <stop offset="70%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#7dd3fc"/>
+    </linearGradient>
+
+    <linearGradient id="backRibbon" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0284c7"/>
+      <stop offset="100%" stop-color="#0369a1"/>
+    </linearGradient>
+
+    <filter id="ribbonGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
       <feMerge>
-        <feMergeNode in="blur2"/>
-        <feMergeNode in="blur1"/>
+        <feMergeNode in="blur"/>
         <feMergeNode in="SourceGraphic"/>
       </feMerge>
     </filter>
 
-    <filter id="softAura" x="-40%" y="-40%" width="180%" height="180%">
-      <feGaussianBlur stdDeviation="45"/>
+    <filter id="softGlow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="50"/>
     </filter>
   </defs>
 
   <!-- Background -->
   <rect width="1200" height="630" fill="url(#bannerBg)"/>
 
-  <!-- Glowing Aura behind Shield -->
-  <circle cx="340" cy="315" r="180" fill="#00e5ff" opacity="0.15" filter="url(#softAura)"/>
+  <!-- Cyan Ambient Lighting behind Shield -->
+  <circle cx="310" cy="315" r="200" fill="#00d2ff" opacity="0.14" filter="url(#softGlow)"/>
 
-  <!-- SHIELD EMBLEM (Scale and centered on left side) -->
-  <g transform="translate(100, 45) scale(0.68)">
-    <!-- Outer Shield Frame -->
-    <path d="M500,100 L695,185 L695,390 C695,535 605,630 500,685 C395,630 305,535 305,390 L305,185 Z" 
-          fill="none" 
-          stroke="url(#neonCyan)" 
-          stroke-width="24" 
-          stroke-linejoin="round" 
-          stroke-linecap="round"
-          filter="url(#vectorGlow)"/>
+  <!-- SHIELD EMBLEM (Scale 0.7, Left Positioned) -->
+  <g transform="translate(100, 35) scale(0.68)">
+    <!-- Back Ribbon -->
+    <path d="M 545,260 C 610,250 655,275 665,315 C 673,355 640,405 585,450 L 560,425 C 605,390 628,355 622,330 C 615,302 575,285 528,290 Z" 
+          fill="url(#backRibbon)"/>
 
-    <!-- Inner Circuit Tracks -->
-    <path d="M450,170 L360,210 L360,365 L410,415" 
-          fill="none" 
-          stroke="url(#neonCyan)" 
-          stroke-width="18" 
-          stroke-linejoin="round" 
-          stroke-linecap="round"/>
-    
-    <path d="M500,170 L545,190" stroke="url(#neonCyan)" stroke-width="18" stroke-linecap="round"/>
-    
-    <path d="M640,320 L640,390 C640,475 580,550 500,605" 
-          fill="none" 
-          stroke="url(#neonCyan)" 
-          stroke-width="16" 
-          stroke-linejoin="round" 
-          stroke-linecap="round" 
-          opacity="0.85"/>
-          
-    <path d="M385,510 C435,565 470,590 500,610 C530,590 565,565 615,510" 
-          fill="none" 
-          stroke="url(#neonCyan)" 
-          stroke-width="18" 
-          stroke-linejoin="round" 
-          stroke-linecap="round"/>
+    <!-- Outer Shield -->
+    <path d="M 500,240 L 620,310 L 620,530 C 620,645 555,718 500,760 C 445,718 380,645 380,530 L 380,310 Z" 
+          fill="url(#shieldNavy)" stroke="#091a2f" stroke-width="3"/>
 
-    <circle cx="630" cy="430" r="10" fill="#00ffff" filter="url(#vectorGlow)"/>
+    <!-- Negative Space Channel -->
+    <path d="M 500,295 L 582,345 L 582,515 C 582,605 538,662 500,698 C 462,662 418,605 418,515 L 418,345 Z" 
+          fill="#0a0e17"/>
 
-    <!-- Center O Logomark -->
-    <circle cx="500" cy="385" r="95" 
-            fill="none" 
-            stroke="url(#neonCyan)" 
-            stroke-width="34" 
-            stroke-linecap="round"
-            filter="url(#vectorGlow)"/>
-    <circle cx="500" cy="385" r="60" fill="#0b1019"/>
+    <!-- Inner Shield -->
+    <path d="M 500,330 L 560,368 L 560,498 C 560,572 525,622 500,652 C 475,622 440,572 440,498 L 440,368 Z" 
+          fill="url(#shieldNavy)"/>
 
-    <!-- Arrow Breakout ↗ -->
-    <line x1="455" y1="430" x2="620" y2="265" 
-          stroke="url(#neonCyan)" 
-          stroke-width="28" 
-          stroke-linecap="round"
-          filter="url(#vectorGlow)"/>
-    <path d="M555,245 L665,220 L640,330 L600,290 Z" 
-          fill="url(#neonCyan)" 
-          stroke="url(#neonCyan)" 
-          stroke-width="4" 
-          stroke-linejoin="round"
-          filter="url(#vectorGlow)"/>
+    <!-- Front Ribbon -->
+    <path d="M 345,515 C 335,585 348,642 400,672 C 465,708 545,678 595,625 C 635,578 662,508 668,432 C 670,395 658,355 638,332 L 608,355 C 622,375 632,408 630,438 C 625,495 602,555 565,595 C 525,638 460,660 415,635 C 378,612 368,572 378,525 Z" 
+          fill="url(#cyanRibbon)" 
+          filter="url(#ribbonGlow)"/>
   </g>
 
-  <!-- TEXT BLOCK (Right Side) -->
-  <g transform="translate(620, 270)">
+  <!-- TYPOGRAPHY BLOCK -->
+  <g transform="translate(600, 270)">
     <text x="0" y="0" class="banner-title" font-size="64">OMNISHIELD</text>
     <text x="0" y="48" class="banner-sub" font-size="22">
-      <tspan fill="#00e5ff">•</tspan> EDR CYBERSECURITY <tspan fill="#00e5ff">•</tspan>
+      <tspan fill="#38bdf8">•</tspan> EDR CYBERSECURITY <tspan fill="#38bdf8">•</tspan>
     </text>
     <text x="0" y="110" class="banner-tag" font-size="18">Unified Native Windows Endpoint Defense</text>
     <text x="0" y="136" class="banner-tag" font-size="15" fill="#64748b">Sysmon · Sigma · YARA · ClamAV · osquery · Defender ASR</text>

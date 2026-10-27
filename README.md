@@ -143,8 +143,8 @@ Rather than inundating analysts with generic alerts, OmniShield evaluates alerts
 ### Single-Step Unified Setup
 1. Download or clone this repository to a short path:
    ```cmd
-   git clone https://github.com/ajaybaniya07/Security-Console.git C:\Build\SecurityConsole
-   cd C:\Build\SecurityConsole
+   git clone https://github.com/ajaybaniya07/OmniShield.git C:\Build\OmniShield
+   cd C:\Build\OmniShield
    ```
 2. Right-click **`INSTALL.bat`** and select **Run as Administrator** (or double-click and accept the UAC prompt).  
    *The installer automatically fetches security binaries, configures ClamAV and Sysmon, binds all add-ons, and compiles the native service.*
@@ -169,7 +169,7 @@ Rather than inundating analysts with generic alerts, OmniShield evaluates alerts
 ## 📂 Repository Structure
 
 ```
-SecurityConsole/
+OmniShield/
 ├── backend/                  # Python 3.12 / FastAPI Core Engine
 │   ├── main.py               # Core orchestrator, API endpoints, risk scorer & security middleware
 │   ├── addon_reports.py      # NIST CSF 2.0 posture engine & user activity auditing

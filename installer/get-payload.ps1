@@ -26,27 +26,42 @@ function Get-GitHubAsset($repo, $pattern, $outFile) {
     }
     throw "No release of $repo has a file matching '$pattern'"
 }
-function Verify-FileHash($outFile, $expectedHash) {
-    if (-not (Test-Path $outFile)) { throw "File $outFile was not found for hash verification." }
+function Verify-PayloadIntegrity($outFile, $expectedHash = $null) {
+    if (-not (Test-Path $outFile)) { throw "File $outFile was not found for integrity verification." }
     $actual = (Get-FileHash -Path $outFile -Algorithm SHA256).Hash.ToLowerInvariant()
-    if ($expectedHash -and ($actual -ne $expectedHash.ToLowerInvariant().Trim())) {
-        Remove-Item -Path $outFile -Force -ErrorAction SilentlyContinue
-        throw "Tampered payload or supply-chain corruption detected! SHA-256 mismatch for $outFile. Expected $expectedHash, got $actual"
+    if ($expectedHash) {
+        $expected = $expectedHash.ToLowerInvariant().Trim()
+        if ($actual -ne $expected) {
+            Remove-Item -Path $outFile -Force -ErrorAction SilentlyContinue
+            throw "Tampered payload or supply-chain corruption detected! SHA-256 mismatch for $outFile. Expected $expected, got $actual"
+        }
+        Write-Host "   [OK] SHA-256 verified ($actual)" -ForegroundColor DarkGreen
     }
-    Write-Host "   [OK] SHA-256 verified ($actual)" -ForegroundColor DarkGreen
+    if ($outFile -match '\.(msi|exe)$') {
+        try {
+            $sig = Get-AuthenticodeSignature -FilePath $outFile
+            if ($sig.Status -eq "Valid") {
+                Write-Host "   [OK] Authenticode signature verified: $($sig.SignerCertificate.Subject)" -ForegroundColor DarkGreen
+            } elseif ($sig.Status -in @("HashMismatch", "SecurityError")) {
+                Remove-Item -Path $outFile -Force -ErrorAction SilentlyContinue
+                throw "Digital signature tampered or invalid! Status: $($sig.Status)"
+            }
+        } catch {
+            Write-Host "   Signature verification note: $($_.Exception.Message)" -ForegroundColor DarkGray
+        }
+    }
 }
 function Step($name, $doneFile, [scriptblock]$action, $expectedHash = $null) {
     if (-not $Force -and (Test-Path $doneFile)) {
-        if ($expectedHash) {
-            try { Verify-FileHash $doneFile $expectedHash } catch { Write-Host "   Tampered existing payload: $($_.Exception.Message)" -ForegroundColor Red; $script:failed += $name; return }
-        }
+        try { Verify-PayloadIntegrity $doneFile $expectedHash } catch { Write-Host "   Tampered existing payload: $($_.Exception.Message)" -ForegroundColor Red; $script:failed += $name; return }
         Write-Host "-> $name already downloaded and verified, skipping" -ForegroundColor DarkGray; return
     }
     try {
         & $action
-        if ($expectedHash -and (Test-Path $doneFile)) { Verify-FileHash $doneFile $expectedHash }
+        if (Test-Path $doneFile) { Verify-PayloadIntegrity $doneFile $expectedHash }
     } catch { Write-Host "   FAILED: $($_.Exception.Message)" -ForegroundColor Red; $script:failed += $name }
 }
+
 
 Step "ClamAV" "$P\clamav.msi" { Get-GitHubAsset "Cisco-Talos/clamav" 'win\.x64\.msi$' "$P\clamav.msi" }
 Step "osquery" "$P\osquery.msi" { Get-GitHubAsset "osquery/osquery" '\.msi$' "$P\osquery.msi" }

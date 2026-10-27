@@ -28,6 +28,11 @@ if ($Create) {
 }
 if ($Open) {
     # explorer.exe starts it as the normal user, even from an administrator window
-    $lnk = $dirs | ForEach-Object { "$_\OmniShield.lnk" } | Where-Object { Test-Path $_ } | Select-Object -First 1
-    if ($lnk) { Start-Process explorer.exe -ArgumentList "`"$lnk`"" } else { Start-Process explorer.exe -ArgumentList $Url }
+    if ($Url) {
+        Start-Process explorer.exe -ArgumentList "`"$Url`""
+    } else {
+        $lnk = $dirs | ForEach-Object { "$_\OmniShield.lnk" } | Where-Object { Test-Path $_ } | Select-Object -First 1
+        if ($lnk) { Start-Process explorer.exe -ArgumentList "`"$lnk`"" } else { Start-Process explorer.exe -ArgumentList "http://127.0.0.1:8080" }
+    }
 }
+

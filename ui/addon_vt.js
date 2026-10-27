@@ -9,7 +9,9 @@ const pg = () => { try { return page; } catch { return ""; } };
 const goto = p => fn("go") && go(p);
 const n0 = n => Number(n || 0).toLocaleString();
 async function J(u, body) {
-  const r = await fetch(u, body === undefined ? {cache: "no-store"} : {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(body)});
+  const csrf = window._csrfToken ? {"X-CSRF-Token": window._csrfToken} : {};
+  const r = await fetch(u, body === undefined ? {cache: "no-store", headers: csrf} : {method: "POST", headers: {"Content-Type": "application/json", ...csrf}, body: JSON.stringify(body)});
+
   const j = await r.json().catch(() => ({}));
   if (!r.ok) { const e = new Error(typeof j.detail === "string" ? j.detail : r.statusText); e.status = r.status; e.data = j; throw e; }
   return j;

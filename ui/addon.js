@@ -334,7 +334,7 @@ function doFix(f) {
   const later = () => setTimeout(() => { if (pg() === "checkup") loadCheckup(true); else homeExtras(true); }, 3000);
   switch (f.action) {
     case "realtime": { const t = Q("#rtToggle"); if (t && !t.checked) { t.checked = true; t.dispatchEvent(new Event("change")); } later(); break; }
-    case "resume": fn("resumeAll") ? resumeAll() : fetch("/api/power/resume", {method: "POST"}); later(); break;
+    case "resume": fn("resumeAll") ? resumeAll() : fn("post") ? post("/api/power/resume") : fetch("/api/power/resume", {method: "POST", headers: window._csrfToken ? {"X-CSRF-Token": window._csrfToken} : {}}); later(); break;
     case "defs": fn("maint") && maint("update_signatures"); break;
     case "scan": fn("quickScan") && quickScan(); break;
     case "selftest": fn("maint") && maint("selftest"); break;

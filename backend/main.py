@@ -3004,6 +3004,33 @@ def system_live(lite: bool = False) -> dict:
 
 
 # --------------------------------------------------------------------------- #
+# Authentication & Access Control
+# --------------------------------------------------------------------------- #
+_BOOTSTRAP_FILE = BASE / "config" / ".auth_bootstrap"
+_BOOTSTRAP_TOKEN: str = secrets.token_hex(32)
+AUTH_CODES: dict[str, float] = {}
+SESSIONS: dict[str, float] = {}
+CSRF_TOKENS: dict[str, str] = {}
+
+
+def _init_bootstrap_token():
+    global _BOOTSTRAP_TOKEN
+    try:
+        _BOOTSTRAP_FILE.parent.mkdir(parents=True, exist_ok=True)
+        _BOOTSTRAP_TOKEN = secrets.token_hex(32)
+        _BOOTSTRAP_FILE.write_text(_BOOTSTRAP_TOKEN, encoding="utf-8")
+        if os.name == "nt":
+            # Restrict ACL: SYSTEM (S-1-5-18) and Administrators (S-1-5-32-544) Read-Only
+            subprocess.run(
+                ["icacls", str(_BOOTSTRAP_FILE), "/inheritance:r",
+                 "/grant:r", "*S-1-5-18:(R)", "*S-1-5-32-544:(R)"],
+                capture_output=True, timeout=5
+            )
+    except Exception as e:
+        log.warning("Auth bootstrap initialization: %s", e)
+
+
+# --------------------------------------------------------------------------- #
 # API
 # --------------------------------------------------------------------------- #
 app = FastAPI(title="OmniShield", version=VERSION)
@@ -3027,6 +3054,35 @@ async def security_guard_middleware(request: Request, call_next):
     if request.headers.get("sec-fetch-site") == "cross-site":
         return JSONResponse(status_code=403, content={"detail": "Forbidden: cross-site requests rejected"})
 
+    # 4. Session authentication and CSRF token enforcement
+    is_bypass = os.environ.get("SC_DEV_AUTH_BYPASS") == "1"
+    path = request.url.path
+    method = request.method.upper()
+
+    # Public static and initial handshake endpoints
+    is_public = (
+        path in ("/", "/favicon.ico", "/index.html")
+        or path.startswith(("/static", "/ui", "/icons"))
+        or path in ("/api/auth/code", "/api/session", "/api/status")
+    )
+
+    if not is_bypass and not is_public:
+        sid = request.cookies.get("sc_session")
+        now_t = time.time()
+        is_valid_session = bool(sid and sid in SESSIONS and now_t <= SESSIONS[sid])
+
+        # Require valid session for sensitive reads and all state mutations
+        if not is_valid_session:
+            if method in ("POST", "PUT", "DELETE", "PATCH") or path in ("/api/browse", "/api/query"):
+                return JSONResponse(status_code=401, content={"detail": "Authentication required. Please launch OmniShield from the desktop shortcut."})
+
+        # Require valid CSRF token for state-mutating requests
+        if method in ("POST", "PUT", "DELETE", "PATCH"):
+            csrf_hdr = request.headers.get("x-csrf-token") or ""
+            expected_csrf = CSRF_TOKENS.get(sid, "")
+            if not csrf_hdr or not secrets.compare_digest(csrf_hdr, expected_csrf):
+                return JSONResponse(status_code=403, content={"detail": "Forbidden: Invalid or missing CSRF token"})
+
     response = await call_next(request)
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-Frame-Options"] = "DENY"
@@ -3034,6 +3090,7 @@ async def security_guard_middleware(request: Request, call_next):
     response.headers["Content-Security-Policy"] = "default-src 'self' 'unsafe-inline' data: blob:; connect-src 'self' http://127.0.0.1:8080 http://localhost:8080;"
     response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
     return response
+
 
 
 class ScanReq(BaseModel):
@@ -3118,30 +3175,17 @@ def init_ransomware_canaries():
         log.debug("Canary init: %s", e)
 
 
-_BOOTSTRAP_FILE = BASE / "config" / ".auth_bootstrap"
-_BOOTSTRAP_TOKEN: str = secrets.token_hex(32)
+@app.get("/api/session")
+def session_status(request: Request):
+    """Returns whether the current client holds an active, valid session."""
+    sid = request.cookies.get("sc_session")
+    is_bypass = os.environ.get("SC_DEV_AUTH_BYPASS") == "1"
+    if is_bypass:
+        return {"authenticated": True, "csrf": "dev_bypass_csrf"}
+    if sid and sid in SESSIONS and time.time() <= SESSIONS[sid]:
+        return {"authenticated": True, "csrf": CSRF_TOKENS.get(sid, "")}
+    return {"authenticated": False, "csrf": ""}
 
-
-def _init_bootstrap_token():
-    global _BOOTSTRAP_TOKEN
-    try:
-        _BOOTSTRAP_FILE.parent.mkdir(parents=True, exist_ok=True)
-        _BOOTSTRAP_TOKEN = secrets.token_hex(32)
-        _BOOTSTRAP_FILE.write_text(_BOOTSTRAP_TOKEN, encoding="utf-8")
-        if os.name == "nt":
-            # Restrict ACL: SYSTEM (S-1-5-18) and Administrators (S-1-5-32-544) Read-Only
-            subprocess.run(
-                ["icacls", str(_BOOTSTRAP_FILE), "/inheritance:r",
-                 "/grant:r", "*S-1-5-18:(R)", "*S-1-5-32-544:(R)"],
-                capture_output=True, timeout=5
-            )
-    except Exception as e:
-        log.warning("Auth bootstrap initialization: %s", e)
-
-
-AUTH_CODES: dict[str, float] = {}
-SESSIONS: dict[str, float] = {}
-CSRF_TOKENS: dict[str, str] = {}
 
 
 @app.post("/api/auth/code")
@@ -3584,11 +3628,22 @@ def places():
     return {"drives": drives(), "quick": quick_targets(), "users": [{"name": u.name, "path": str(u)} for u in user_profiles()]}
 
 
+RESTRICTED_BROWSE_FOLDERS = (
+    r"\windows\system32\config",
+    r"\system volume information",
+    r"\$recycle.bin",
+)
+
+
 @app.get("/api/browse")
 def browse(path: str = "", files: bool = False):
     if not path:
         return {"path": "", "parent": None, "drives": drives(), "dirs": [], "files": []}
     p = os.path.normpath(os.path.expandvars(path))
+    p_lower = p.lower()
+    for restricted in RESTRICTED_BROWSE_FOLDERS:
+        if restricted in p_lower:
+            raise HTTPException(403, "Access to sensitive system directories is restricted")
     if not os.path.isdir(p):
         raise HTTPException(404, f"Folder not found: {path}")
     ex = Exclusions()
@@ -3609,6 +3664,7 @@ def browse(path: str = "", files: bool = False):
     key = lambda x: x["name"].lower()
     return {"path": p, "parent": "" if parent == p else parent, "excluded": ex.path(p),
             "dirs": sorted(dirs, key=key), "files": sorted(fl, key=key)[:1000]}
+
 
 
 @app.get("/api/exclusions")

@@ -78,7 +78,9 @@ def _protect(s: str) -> str:
         import win32crypt  # type: ignore
         blob = win32crypt.CryptProtectData(s.encode(), "SecurityConsole VT", None, None, None, 0x4)
         return "dpapi:" + base64.b64encode(blob).decode()
-    except Exception:
+    except Exception as e:
+        if M and hasattr(M, "log"):
+            M.log.warning("DPAPI encryption unavailable for secret storage (%s); falling back to obfuscation.", e)
         return "plain:" + base64.b64encode(s.encode()).decode()
 
 

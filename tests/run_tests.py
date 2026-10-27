@@ -25,8 +25,11 @@ for mod_name in ["uvicorn", "fastapi", "fastapi.responses", "fastapi.staticfiles
         mock_mod = MagicMock()
         if mod_name == "pydantic":
             class MockBaseModel:
-                pass
+                def __init__(self, **kwargs):
+                    for k, v in kwargs.items():
+                        setattr(self, k, v)
             mock_mod.BaseModel = MockBaseModel
+
         if mod_name == "fastapi":
             class MockHTTPException(Exception):
                 def __init__(self, status_code=400, detail=""):
@@ -207,9 +210,42 @@ class TestInputParsersSafetyNet(unittest.TestCase):
         self.assertIn("SC_Infostealer_RedLine_Artifacts", content)
         self.assertIn("SC_Infostealer_Vidar_Artifacts", content)
         self.assertIn("SC_Infostealer_LummaC2_Patterns", content)
+    # 10. Session code exchange and validation tests
+    def test_session_exchange_and_validation(self):
+        import main
+        from unittest.mock import MagicMock
+
+        # Invalid code rejection
+        bad_req = main.SessionReq(code="non_existent_code")
+        with self.assertRaises(main.HTTPException) as ctx:
+            main.session_exchange(bad_req)
+        self.assertEqual(ctx.exception.status_code, 401)
+
+        # Legitimate code generation and exchange
+        req_auth = MagicMock()
+        req_auth.headers = {"Authorization": f"Bearer {main._BOOTSTRAP_TOKEN}"}
+        code_res = main.auth_code(req_auth)
+        self.assertIn("code", code_res)
+
+        valid_req = main.SessionReq(code=code_res["code"])
+        session_res = main.session_exchange(valid_req)
+        self.assertIsNotNone(session_res)
+
+    # 11. Browse restricted directories enforcement
+    def test_restricted_directory_browse_block(self):
+        import main
+        for restricted_path in [
+            r"C:\Windows\System32\config\SAM",
+            r"C:\System Volume Information",
+            r"C:\$Recycle.Bin",
+        ]:
+            with self.assertRaises(main.HTTPException) as ctx:
+                main.browse(path=restricted_path)
+            self.assertEqual(ctx.exception.status_code, 403)
 
 
 if __name__ == "__main__":
+
     suite = unittest.defaultTestLoader.loadTestsFromTestCase(TestInputParsersSafetyNet)
     runner = unittest.TextTestRunner(verbosity=2)
     result = runner.run(suite)

@@ -3757,5 +3757,13 @@ if UI_DIR.exists():
         return FileResponse(UI_DIR / "index.html", headers={"Cache-Control": "no-store"})
 
 
+try:
+    import sys as _sys
+    import addon_reports
+    addon_reports.register(app, _sys.modules[__name__])
+except Exception:
+    log.exception("Add-on failed to load")
+
+
 if __name__ == "__main__":
     uvicorn.run(app, host=CFG["host"], port=int(CFG["port"]), log_level="info")

@@ -13,12 +13,15 @@ exit /b
 
 :main
 cd /d "%~dp0"
-title Security Console - Install add-on 1.9
-echo === Security Console add-on 1.9: User activity, Security checkup and VirusTotal ===
+title Security Console - Add-on Sync & Update
+echo =========================================================================
+echo   Security Console: Add-on Sync & In-Place Update
+echo =========================================================================
+echo  Notice: INSTALL.bat now installs both Core and Add-ons in one step!
+echo  Use this script to re-apply, sync, or update add-ons at any time.
 echo.
 if not exist "%~dp0installer\setup-all.ps1" (
-  echo This folder doesn't contain Security Console 1.7.
-  echo Extract the add-on into your Security Console folder, for example C:\Build\SecurityConsole, and run this again.
+  echo Error: installer\setup-all.ps1 not found in this directory.
   pause
   exit /b
 )

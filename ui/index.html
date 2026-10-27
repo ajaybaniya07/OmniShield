@@ -586,6 +586,7 @@ html[data-motion=off] *,html[data-motion=off] *::before,html[data-motion=off] *:
 .qa{grid-auto-rows:1fr}
 .netrow .hv-t span b{display:inline;font-size:inherit}
 </style>
+<link rel="stylesheet" href="/static/addon.css?v=1.9">
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute"><defs>
@@ -1761,5 +1762,6 @@ window.addEventListener("resize",()=>{clearTimeout(window._rz);window._rz=setTim
 applyPrefs();load();rtPoll();tickClock();setInterval(tickClock,15000);setInterval(rtPoll,3000);requestAnimationFrame(moveInd);
 setInterval(()=>{if(["home","activity"].includes(page)&&!$(".overlay"))load()},20000);
 </script>
+<script src="/static/addon.js?v=1.9"></script>
 </body>
 </html>

@@ -11,7 +11,8 @@ No WSL, Docker or server needed. Everything is changed from the app - no PowerSh
 
 | File | Use it to |
 |---|---|
-| INSTALL.bat | First install, or repair everything |
+| INSTALL.bat | Complete unified installation (Core + Add-ons: User Activity, Security Checkup, NIST CSF 2.0, VirusTotal) |
+| INSTALL-ADDON.bat | Re-apply or update add-ons and UI extensions |
 | UPDATE.bat | Install a newer version. Keeps settings, history, blocked programs, mutes and quarantine |
 | START Security Console.bat | Open the dashboard (starts the background program if needed) |
 | FIX-ClamAV.bat | Reinstall ClamAV only |

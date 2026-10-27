@@ -57,6 +57,16 @@ try {
         if (-not (Test-Path "$Inst\payload\fonts\InterVariable.woff2")) { try { & "$Inst\get-payload.ps1" | Out-Null } catch {} }
     }
 
+    # Integrate add-ons (User Activity, Security Checkup, NIST CSF 2.0, VirusTotal)
+    if (Test-Path "$Inst\apply-addon.ps1") {
+        try {
+            Write-Host "Integrating Add-ons (User Activity, Security Checkup, VirusTotal)..." -ForegroundColor Cyan
+            & "$Inst\apply-addon.ps1" | Out-Null
+        } catch {
+            Write-Host "Notice: Add-on integration check: $($_.Exception.Message)" -ForegroundColor Yellow
+        }
+    }
+
     Head 3 "Building the Security Console program (first time takes a few minutes)"
     $be = "$Root\backend"; $dist = "$be\dist\backend.exe"
     $srcTime = @((Get-Item "$be\main.py").LastWriteTime, (Get-Item "$be\requirements.txt").LastWriteTime) | Sort-Object | Select-Object -Last 1
@@ -70,7 +80,8 @@ try {
         Remove-Item $dist -Force -ErrorAction SilentlyContinue
         Push-Location $be
         & $vpy -m PyInstaller --noconfirm --onefile --name backend --collect-submodules uvicorn --collect-submodules watchdog `
-            --hidden-import fastapi --hidden-import psutil --hidden-import win32evtlog --hidden-import win32timezone main.py
+            --hidden-import fastapi --hidden-import psutil --hidden-import win32evtlog --hidden-import win32timezone `
+            --hidden-import addon_reports --hidden-import addon_vt main.py
         Pop-Location
         if (-not (Test-Path $dist)) { Stop-Setup "backend.exe wasn't created. Check Windows Security > Protection history - Defender sometimes removes newly built programs." }
     }

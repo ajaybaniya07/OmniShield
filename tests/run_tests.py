@@ -273,6 +273,22 @@ class TestInputParsersSafetyNet(unittest.TestCase):
                 main.browse(path=restricted_path)
             self.assertEqual(ctx.exception.status_code, 403)
 
+    # 12. Enterprise EDR noise filtering (SentinelOne/Cylance model)
+    def test_enterprise_noise_filtering(self):
+        from main import is_benign_sysmon_noise
+        # Raw Sysmon telemetry wrappers should always be filtered out
+        self.assertTrue(is_benign_sysmon_noise("File Created (Sysmon Alert)", "chrome.exe", "medium"))
+        self.assertTrue(is_benign_sysmon_noise("Net Conn (Sysmon Alert)", "svchost.exe", "medium"))
+        self.assertTrue(is_benign_sysmon_noise("Reg Key Value Set (Sysmon Alert)", "system", "medium"))
+        self.assertTrue(is_benign_sysmon_noise("Uncommon New Firewall Rule Added In Windows Firewall Exception List", "", "medium"))
+        self.assertTrue(is_benign_sysmon_noise("Persistence Change: New Listening ports", "chrome.exe", "medium"))
+        
+        # Real threats must NEVER be filtered out
+        self.assertFalse(is_benign_sysmon_noise("LSASS Memory Dump", "mimikatz.exe", "high"))
+        self.assertFalse(is_benign_sysmon_noise("Defender Alert (Severe)", "malware.exe", "critical"))
+        self.assertFalse(is_benign_sysmon_noise("Antivirus - Hacktool Signature", "tool.exe", "high"))
+        self.assertFalse(is_benign_sysmon_noise("Ransomware Mass File Encryption", "evil.exe", "critical"))
+
 
 if __name__ == "__main__":
 

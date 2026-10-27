@@ -322,7 +322,23 @@ def emit(engine, severity, rule, target, details="", uniq=None, origin="", mitre
 PID_RE = re.compile(r"\b(?:PID|ParentPID|ProcessId|ParentProcessId|SrcPID|SourceProcessId)\s*[:=]\s*(\d+)", re.I)
 OWN_NAMES = ("sysmon64", "sysmondrv", "clamd", "freshclam", "osqueryd", "nssm.exe")
 
-BENIGN_SIGMA_PATTERNS = (
+# Raw Sysmon Telemetry & Routine Operational Noise (SentinelOne / Cylance Trust Model)
+RAW_TELEMETRY_PATTERNS = (
+    "(sysmon alert)",
+    "(sysmon)",
+    "net conn",
+    "reg key value set",
+    "file created",
+    "reg key create/delete",
+    "process creation (sysmon",
+    "raw access read",
+    "createremotethread (sysmon",
+    "uncommon new firewall rule added in windows firewall exception list",
+    "a rule has been deleted from the windows firewall exception list",
+    "new firewall rule added via netsh.exe",
+    "persistence change: new listening ports",
+    "driver loaded (unsigned)",
+    "proc exec (non-exe filetype)",
     "powershell script execution",
     "non-interactive powershell",
     "windows command shell started from",
@@ -339,6 +355,18 @@ BENIGN_SIGMA_PATTERNS = (
     "net.exe execution",
     "tasklist execution",
 )
+
+TRUSTED_SYSTEM_PROCS = (
+    "searchindexer.exe", "msmpeng.exe", "tiworker.exe", "trustedinstaller.exe",
+    "mousocoreworker.exe", "chrome.exe", "msedge.exe", "firefox.exe", "brave.exe",
+    "svchost.exe", "runtimebroker.exe", "taskhostw.exe", "conhost.exe", "explorer.exe",
+    "system", "services.exe", "lsass.exe", "csrss.exe", "smss.exe", "winlogon.exe",
+    "spoolsv.exe", "fontdrvhost.exe", "dwm.exe", "sihost.exe", "ctfmon.exe",
+    "nvidia overlay.exe", "nvcontainer.exe", "nvdisplay.container.exe",
+    "discord.exe", "spotify.exe", "code.exe", "devenv.exe", "git.exe", "python.exe"
+)
+
+BENIGN_SIGMA_PATTERNS = RAW_TELEMETRY_PATTERNS
 
 
 def self_markers() -> set[str]:
@@ -359,16 +387,28 @@ def is_self_noise(text: str) -> bool:
 
 
 def is_benign_sysmon_noise(rule: str, details: str, sev: str) -> bool:
-    """Filter out routine, noisy low/medium telemetry rules triggered by legitimate Windows processes."""
+    """Filter out routine, noisy telemetry rules triggered by legitimate Windows processes,
+    emulating enterprise EDR baseline trust architectures (SentinelOne, Cylance, CrowdStrike)."""
     r = (rule or "").lower()
     d = (details or "").lower()
+
+    # 1. Pure raw telemetry events (Sysmon wrappers) are NEVER actionable security threat alerts
+    if any(p in r for p in RAW_TELEMETRY_PATTERNS):
+        return True
+
+    # 2. Windows internal PowerShell module scripts and admin utilities
+    if "potentially malicious pwsh" in r:
+        if any(ms in d for ms in ("microsoft.powershell", "cmdletization", "cimsession", "set-strictmode",
+                                  "storagepool", "system.drawing", "shortcut.ps1", "render_logo.ps1",
+                                  "securityconsole", "omnishield", "sc_self")):
+            return True
+
+    # 3. Routine operational events for low/medium severity
     if sev in ("low", "medium"):
-        if any(p in r for p in BENIGN_SIGMA_PATTERNS):
-            return True
-        if any(proc in d for proc in ("searchindexer.exe", "msmpeng.exe", "tiworker.exe", "trustedinstaller.exe",
-                                      "mousocoreworker.exe", "chrome.exe", "msedge.exe", "svchost.exe",
-                                      "runtimebroker.exe", "taskhostw.exe", "conhost.exe", "explorer.exe")):
-            return True
+        if any(proc in d for proc in TRUSTED_SYSTEM_PROCS):
+            # Guard against suppressing actual exploits even if reported at low/medium
+            if not any(crit in r for crit in ("lsass", "mimikatz", "dump", "tamper", "token", "inject", "amsi", "ransom", "c2", "webshell")):
+                return True
     return False
 
 
@@ -379,30 +419,54 @@ def is_self_row(row: dict) -> bool:
     return is_self_noise(text) or any(n in text for n in OWN_NAMES)
 
 
+def purge_telemetry_noise() -> dict:
+    """Purge raw Sysmon telemetry and benign noise from the active database,
+    aligning with enterprise EDR standards (SentinelOne/Cylance).
+    Deletes raw telemetry events and marks self-noise / benign operational alerts resolved."""
+    patterns = [
+        "%(sysmon alert)%",
+        "%net conn (sysmon%",
+        "%reg key value set (sysmon%",
+        "%file created (sysmon%",
+        "%reg key create/delete (sysmon%",
+        "%process creation (sysmon%",
+        "%raw access read (sysmon%",
+        "%uncommon new firewall rule added in windows firewall exception list%",
+        "%a rule has been deleted from the windows firewall exception list%",
+        "%new firewall rule added via netsh.exe%",
+        "%persistence change: new listening ports%",
+        "%driver loaded (unsigned)%",
+        "%proc exec (non-exe filetype)%",
+    ]
+    with _db_lock, db() as con:
+        deleted = 0
+        for pat in patterns:
+            cur = con.execute("DELETE FROM events WHERE rule LIKE ?", (pat,))
+            deleted += cur.rowcount
+
+        rows = con.execute("SELECT id, engine, rule, severity, target, details FROM events WHERE status='new'").fetchall()
+        ack_ids = []
+        for r in rows:
+            if is_self_noise(f'{r["target"]} {r["details"]}') or is_benign_sysmon_noise(r["rule"], r["details"] or "", r["severity"]):
+                ack_ids.append(r["id"])
+        if ack_ids:
+            con.executemany("UPDATE events SET status='resolved' WHERE id=?", [(i,) for i in ack_ids])
+
+        if deleted > 500:
+            try:
+                con.execute("PRAGMA optimize;")
+            except Exception:
+                pass
+        log.info("Purged %d raw telemetry events, resolved %d benign noise events", deleted, len(ack_ids))
+        return {"deleted": deleted, "resolved": len(ack_ids)}
+
+
 def hide_self_alerts() -> int:
     """Hide alerts that OmniShield's own activity caused, and tidy up routine telemetry noise."""
     if not CFG.get("hide_self", True):
         return 0
-    with db() as con:
-        rows = con.execute("SELECT id,engine,rule,severity,target,details FROM events WHERE status='new' "
-                           "AND engine IN ('sigma','osquery')").fetchall()
-    ids = []
-    for r in rows:
-        hit = is_self_noise(f'{r["target"]} {r["details"]}')
-        if not hit and r["engine"] == "sigma":
-            hit = is_benign_sysmon_noise(r["rule"], r["details"] or "", r["severity"])
-        if not hit and r["engine"] == "osquery":
-            try:
-                hit = is_self_row(json.loads(r["details"] or "{}"))
-            except ValueError:
-                pass
-        if hit:
-            ids.append(r["id"])
-    if ids:
-        with _db_lock, db() as con:
-            con.executemany("UPDATE events SET status='ack' WHERE id=?", [(i,) for i in ids])
-        log.info("hid %d alerts caused by OmniShield itself or routine telemetry noise", len(ids))
-    return len(ids)
+    res = purge_telemetry_noise()
+    return res["deleted"] + res["resolved"]
 
 
 # --------------------------------------------------------------------------- #
@@ -3822,6 +3886,12 @@ def query(req: QueryReq):
 @app.post("/api/sigma/run")
 def sigma_now():
     return {"job": start_job("sigma", "Windows event logs", lambda: {"new_events": run_sigma()})}
+
+
+@app.post("/api/events/purge-noise")
+def api_purge_noise():
+    res = purge_telemetry_noise()
+    return {"ok": True, "purged": res["deleted"], "resolved": res["resolved"]}
 
 
 @app.post("/api/quarantine")

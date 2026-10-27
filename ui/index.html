@@ -729,7 +729,11 @@ html[data-motion=off] *,html[data-motion=off] *::before,html[data-motion=off] *:
 <!-- THREATS -->
 <section id="p-threats" class="hide">
   <div class="head"><div><h1>Threats</h1><p>Click any item to see what it is and how to fix it.</p></div>
-    <button class="ghost" onclick="exportThreats()"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Export</button></div>
+    <div style="display:flex;gap:8px">
+      <button class="ghost" id="btnPurgeNoise" onclick="purgeNoise()" title="Suppress raw Sysmon telemetry and normal Windows operational noise (SentinelOne/Cylance trust mode)"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>Suppress Telemetry Noise</button>
+      <button class="ghost" onclick="exportThreats()"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Export</button>
+    </div>
+  </div>
   <div class="bar">
     <div class="tabs" id="tTabs"><button class="on" data-v="new">To review</button><button data-v="ack">Ignored</button><button data-v="resolved">Resolved</button><button data-v="">All</button></div>
     <div class="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg><input id="q" placeholder="Search by name or file…"></div>
@@ -1203,6 +1207,17 @@ async function bulk(status){const ids=[...selected];if(!ids.length)return;await 
 async function setSt(id,s){await post(`/api/events/${id}/status`,{status:s});toast({resolved:"Marked as resolved",ack:"Ignored",new:"Reopened"}[s]);load()}
 function exportThreats(){const q=v=>`"${String(v??"").replace(/"/g,'""')}"`;const rows=[["Time","Severity","Source","Rule","Location","Status","Details"]].concat(tRows.map(e=>[e.time,e.severity,(SRC[e.engine]||[e.engine])[0],e.rule,e.target,e.status,e.details]));
   const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([rows.map(r=>r.map(q).join(",")).join("\r\n")],{type:"text/csv"}));a.download=`threats-${new Date().toLocaleDateString("en-CA")}.csv`;a.click()}
+async function purgeNoise(){
+  try{
+    toast("Applying enterprise process trust & purging telemetry noise...","act");
+    const r=await post("/api/events/purge-noise");
+    toast(`Enterprise trust applied: Purged ${r.purged||0} telemetry logs. ${r.resolved||0} benign events resolved.`,"shield");
+    loadStats();
+    loadThreats();
+  }catch(e){
+    toast("Error purging noise: "+e.message,"bad");
+  }
+}
 
 /* ================= SCAN ================= */
 let scanKind="quick",scanDrive=null,pollT=null,curReport=null,pendingReport=null;
